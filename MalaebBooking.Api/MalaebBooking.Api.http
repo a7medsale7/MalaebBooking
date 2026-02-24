@@ -1,0 +1,6 @@
+@MalaebBooking.Api_HostAddress = http://localhost:5244
+
+GET {{MalaebBooking.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
