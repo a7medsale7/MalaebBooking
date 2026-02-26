@@ -1,38 +1,32 @@
-﻿using MalaebBooking.Infrastructure;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using MalaebBooking.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ربط الـ Infrastructure
-builder.Services.AddInfrastructure(builder.Configuration);
+// ================================
+// Register All Dependencies
+// ================================
+builder.Services.AddApiDependencies(builder.Configuration);
 
-// إضافة الـ Controllers و API Explorer
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-
-// إضافة Swagger
-builder.Services.AddSwaggerGen();
-
+// ================================
+// Build App
+// ================================
 var app = builder.Build();
 
+// ================================
+// Middleware
+// ================================
 if (app.Environment.IsDevelopment())
 {
-    // تفعيل Swagger JSON
     app.UseSwagger();
-
-    // تفعيل Swagger UI على root
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "MalaebBooking API V1");
-        options.RoutePrefix = string.Empty; // عشان يفتح مباشرة على /
+        options.RoutePrefix = string.Empty;
     });
 }
 
 app.UseHttpsRedirection();
 
-// ترتيب الـ Middleware مهم: Authentication قبل Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 

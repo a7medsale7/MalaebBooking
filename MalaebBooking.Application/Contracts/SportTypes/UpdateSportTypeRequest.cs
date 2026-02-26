@@ -5,9 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace MalaebBooking.Application.Contracts.SportTypes;
-public record SportTypeResponse(
-    int Id,
-    string Name,
+public record UpdateSportTypeRequest(string Name,
     string? Description,
     string? IconUrl,
     bool IsActive);

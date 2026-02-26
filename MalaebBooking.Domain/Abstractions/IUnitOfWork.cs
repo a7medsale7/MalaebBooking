@@ -1,10 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using MalaebBooking.Domain.Abstractions.Repositories;
+using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MalaebBooking.Domain.Abstractions;
-internal interface IUnitOfWork
+
+public interface IUnitOfWork : IDisposable
 {
+    ISportTypeRepository SportTypes { get; }
+    // لو عندك Repository تانية، تضيفها هنا
+    // ISportScheduleRepository SportSchedules { get; }
+
+    Task<int> CommitAsync(CancellationToken cancellationToken = default);
 }
