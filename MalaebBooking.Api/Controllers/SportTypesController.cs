@@ -1,5 +1,6 @@
 ﻿using MalaebBooking.Application.Contracts.SportTypes;
 using MalaebBooking.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 namespace MalaebBooking.Api.Controllers;
 
 [Route("api/[controller]")]
+[Authorize]
 [ApiController]
 public class SportTypesController : ControllerBase
 {

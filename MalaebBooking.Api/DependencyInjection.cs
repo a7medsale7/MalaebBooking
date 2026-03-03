@@ -2,14 +2,21 @@
 using MalaebBooking.Application;
 using MalaebBooking.Application.Services;
 using MalaebBooking.Domain.Abstractions.Repositories;
+using MalaebBooking.Domain.Entities;
 using MalaebBooking.Infrastructure;
+using MalaebBooking.Infrastructure.Authentication;
+using MalaebBooking.Infrastructure.Persistence;
 using MalaebBooking.Infrastructure.Repositories;
 using Mapster;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using System.Reflection;
+using System.Text;
 
 namespace MalaebBooking.Api;
 
@@ -26,7 +33,8 @@ public static class DependencyInjection
             .AddPresentation()
             .AddSwaggerDocumentation()
             .AddMapsterConfiguration()
-            .AddFluentValidationConfiguration();
+            .AddFluentValidationConfiguration()
+            .AddAuthenticationConfiguration(configuration);
 
         return services;
     }
@@ -49,6 +57,7 @@ public static class DependencyInjection
         this IServiceCollection services)
     {
         services.AddScoped<ISportTypeRepository, SportTypeRepository>();
+        services.AddScoped<IAuthService, AuthService>();
         return services;
     }
 
@@ -105,6 +114,47 @@ public static class DependencyInjection
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssembly(
             typeof(AssemblyReference).Assembly);
+
+        return services;
+    }
+
+    // ================================
+    // AddAuthentication Configuration
+    // ================================
+
+    private static IServiceCollection AddAuthenticationConfiguration(
+     this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddScoped<IJwtProvider, JwtProvider>();
+
+        services.AddOptions<JwtOptions>()
+            .Bind(configuration.GetSection(JwtOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        var settings = configuration
+            .GetSection(JwtOptions.SectionName)
+            .Get<JwtOptions>()!;
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = settings.Issuer,
+                ValidAudience = settings.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(settings.Key))
+            };
+        });
 
         return services;
     }

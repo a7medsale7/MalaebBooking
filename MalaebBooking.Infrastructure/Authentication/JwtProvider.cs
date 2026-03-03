@@ -1,10 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using MalaebBooking.Domain.Entities;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MalaebBooking.Infrastructure.Authentication;
-internal class JwtProvider
+
+public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 {
+    private readonly JwtOptions options = options.Value;
+
+    public (string Token, DateTime Expiration) GenerateToken(ApplicationUser user)
+    {
+        var key = options.Key;
+        var issuer = options.Issuer;
+        var audience = options.Audience;
+        var expiryMinutes = options.ExpiryMinutes;
+
+        var expiration = DateTime.UtcNow.AddMinutes(expiryMinutes);
+
+        Claim[] claims =
+        [
+            new(JwtRegisteredClaimNames.Sub, user.Id),
+            new(JwtRegisteredClaimNames.Email, user.Email!),
+            new(JwtRegisteredClaimNames.GivenName, user.FirstName),
+            new(JwtRegisteredClaimNames.FamilyName, user.LastName),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        ];
+
+        var symmetricSecurityKey =
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Key));
+
+        var signingCredentials =
+            new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
+
+        var jwtSecurityToken = new JwtSecurityToken(
+            issuer: options.Issuer,
+            audience: options.Audience,
+            claims: claims,
+            notBefore: DateTime.UtcNow,
+            expires: expiration,
+            signingCredentials: signingCredentials
+        );
+
+        var token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+
+        return (token, expiration);
+    }
 }

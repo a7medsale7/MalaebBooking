@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MalaebBooking.Domain\MalaebBooking.Domain.csproj" />
+    <ProjectReference Include="..\MalaebBooking.Infrastructure\MalaebBooking.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
