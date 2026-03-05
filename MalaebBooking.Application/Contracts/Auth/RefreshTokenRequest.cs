@@ -5,6 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace MalaebBooking.Application.Contracts.Auth;
-internal class RefreshTokenRequest
+public class RefreshTokenRequest
 {
+    public string Token { get; set; }
+
+    public string RefreshToken { get; set; }
+
 }

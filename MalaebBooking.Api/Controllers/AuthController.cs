@@ -24,6 +24,36 @@ public class AuthController(IAuthService authService) : ControllerBase
         return Ok(authRequest);
     }
 
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshToken(RefreshTokenRequest request, CancellationToken cancellationToken)
+    {
+        var authResponse = await authService.RefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
+        if (authResponse is null)
+            return Unauthorized();
+        return Ok(authResponse);
+    }
+
+    [HttpPost("revoke")]
+    public async Task<IActionResult> RevokeToken(RefreshTokenRequest request, CancellationToken cancellationToken)
+    {
+        var result = await authService.RevokeRefreshTokenAsync(
+            request.Token,
+            request.RefreshToken,
+            cancellationToken);
+
+        if (!result)
+            return BadRequest(new
+            {
+                message = "Invalid token or refresh token."
+            });
+
+        return Ok(new
+        {
+            message = "Token revoked successfully."
+        });
+    }
+
+
     [HttpPost("register")]
     public async Task<IActionResult> Register(
      RegisterRequest request,

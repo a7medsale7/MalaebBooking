@@ -10,5 +10,7 @@ public interface IJwtProvider
 {
     (string Token, DateTime Expiration) GenerateToken(ApplicationUser user);
 
+    string? ValidateToken(string token);    
+
 
 }
