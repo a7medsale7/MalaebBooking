@@ -2,8 +2,6 @@
 using MalaebBooking.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MalaebBooking.Api.Controllers;
 
@@ -23,37 +21,84 @@ public class SportTypesController : ControllerBase
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var result = await _service.GetAllAsync(cancellationToken);
-        return Ok(result);
+
+        if (result.IsFailure)
+            return BadRequest(new
+            {
+                result.Error.Code,
+                result.Error.Description
+            });
+
+        return Ok(result.Value);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
         var result = await _service.GetByIdAsync(id, cancellationToken);
-        if (result == null)
-            return NotFound();
 
-        return Ok(result);
+        if (result.IsFailure)
+            return NotFound(new
+            {
+                result.Error.Code,
+                result.Error.Description
+            });
+
+        return Ok(result.Value);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Add([FromBody] SportTypeRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Add(
+        [FromBody] SportTypeRequest request,
+        CancellationToken cancellationToken)
     {
         var result = await _service.AddAsync(request, cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+
+        if (result.IsFailure)
+            return BadRequest(new
+            {
+                result.Error.Code,
+                result.Error.Description
+            });
+
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = result.Value.Id },
+            result.Value);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] UpdateSportTypeRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(
+        int id,
+        [FromBody] UpdateSportTypeRequest request,
+        CancellationToken cancellationToken)
     {
         var result = await _service.UpdateAsync(id, request, cancellationToken);
-        return Ok(result);
+
+        if (result.IsFailure)
+            return NotFound(new
+            {
+                result.Error.Code,
+                result.Error.Description
+            });
+
+        return Ok(result.Value);
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> SoftDelete(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> SoftDelete(
+        int id,
+        CancellationToken cancellationToken)
     {
         var result = await _service.SoftDeleteAsync(id, cancellationToken);
-        return Ok(result);
+
+        if (result.IsFailure)
+            return NotFound(new
+            {
+                result.Error.Code,
+                result.Error.Description
+            });
+
+        return Ok(result.Value);
     }
 }

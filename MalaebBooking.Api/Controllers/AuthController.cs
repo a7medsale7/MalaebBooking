@@ -1,9 +1,6 @@
 ﻿using MalaebBooking.Application.Contracts.Auth;
 using MalaebBooking.Application.Services;
-using MalaebBooking.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using System.Threading.Tasks;
 
 namespace MalaebBooking.Api.Controllers;
 
@@ -14,37 +11,60 @@ public class AuthController(IAuthService authService) : ControllerBase
     private readonly IAuthService authService = authService;
 
     [HttpPost("")]
-    public async Task<IActionResult> Login(LoginRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Login(
+        LoginRequest request,
+        CancellationToken cancellationToken)
     {
-        var authRequest = await authService.GetTokenAsync(request.Email, request.Password, cancellationToken);
+        var result = await authService.GetTokenAsync(
+            request.Email,
+            request.Password,
+            cancellationToken);
 
-        if (authRequest is null)
-            return Unauthorized();
+        if (result.IsFailure)
+            return Unauthorized(new
+            {
+                result.Error.Code,
+                result.Error.Description
+            });
 
-        return Ok(authRequest);
+        return Ok(result.Value);
     }
 
     [HttpPost("refresh")]
-    public async Task<IActionResult> RefreshToken(RefreshTokenRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> RefreshToken(
+        RefreshTokenRequest request,
+        CancellationToken cancellationToken)
     {
-        var authResponse = await authService.RefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
-        if (authResponse is null)
-            return Unauthorized();
-        return Ok(authResponse);
+        var result = await authService.RefreshTokenAsync(
+            request.Token,
+            request.RefreshToken,
+            cancellationToken);
+
+        if (result.IsFailure)
+            return Unauthorized(new
+            {
+                result.Error.Code,
+                result.Error.Description
+            });
+
+        return Ok(result.Value);
     }
 
     [HttpPost("revoke")]
-    public async Task<IActionResult> RevokeToken(RefreshTokenRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> RevokeToken(
+        RefreshTokenRequest request,
+        CancellationToken cancellationToken)
     {
         var result = await authService.RevokeRefreshTokenAsync(
             request.Token,
             request.RefreshToken,
             cancellationToken);
 
-        if (!result)
+        if (result.IsFailure)
             return BadRequest(new
             {
-                message = "Invalid token or refresh token."
+                result.Error.Code,
+                result.Error.Description
             });
 
         return Ok(new
@@ -53,13 +73,21 @@ public class AuthController(IAuthService authService) : ControllerBase
         });
     }
 
-
     [HttpPost("register")]
     public async Task<IActionResult> Register(
-     RegisterRequest request,
-     CancellationToken cancellationToken)
+        RegisterRequest request,
+        CancellationToken cancellationToken)
     {
-        await authService.RegisterAsync(request, cancellationToken);
+        var result = await authService.RegisterAsync(
+            request,
+            cancellationToken);
+
+        if (result.IsFailure)
+            return BadRequest(new
+            {
+                result.Error.Code,
+                result.Error.Description
+            });
 
         return Ok(new
         {
@@ -68,9 +96,21 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [HttpPost("confirm-email")]
-    public async Task<IActionResult> ConfirmEmail(ConfirmEmailReqest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> ConfirmEmail(
+        ConfirmEmailReqest request,
+        CancellationToken cancellationToken)
     {
-        await authService.ConfirmEmailAsync(request, cancellationToken);
+        var result = await authService.ConfirmEmailAsync(
+            request,
+            cancellationToken);
+
+        if (result.IsFailure)
+            return BadRequest(new
+            {
+                result.Error.Code,
+                result.Error.Description
+            });
+
         return Ok(new
         {
             message = "Email confirmed successfully. You can now log in."
@@ -78,9 +118,21 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [HttpPost("resend-confirmation-email")]
-    public async Task<IActionResult> ResendConfirmationEmail(ResendConfirmationEmailReqest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> ResendConfirmationEmail(
+        ResendConfirmationEmailReqest request,
+        CancellationToken cancellationToken)
     {
-        await authService.ResendConfirmationEmailAsync(request, cancellationToken);
+        var result = await authService.ResendConfirmationEmailAsync(
+            request,
+            cancellationToken);
+
+        if (result.IsFailure)
+            return BadRequest(new
+            {
+                result.Error.Code,
+                result.Error.Description
+            });
+
         return Ok(new
         {
             message = "If an account with that email exists, a confirmation email has been resent."

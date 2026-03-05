@@ -1,31 +1,34 @@
-﻿using MalaebBooking.Application.Contracts.Auth;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Contracts.Auth;
 
 namespace MalaebBooking.Application.Services;
+
 public interface IAuthService
 {
-    Task<AuthResponse?> GetTokenAsync(string email, string password,CancellationToken cancellationToken);
+    Task<Result<AuthResponse>> GetTokenAsync(
+        string email,
+        string password,
+        CancellationToken cancellationToken);
 
-    Task RegisterAsync(RegisterRequest registerRequest, CancellationToken cancellationToken);
-    Task ConfirmEmailAsync(ConfirmEmailReqest request, CancellationToken cancellationToken);
-    Task ResendConfirmationEmailAsync(ResendConfirmationEmailReqest resendConfirmation, CancellationToken cancellationToken);
-        Task<AuthResponse?> RefreshTokenAsync(string token , string refreshToken, CancellationToken cancellationToken);
+    Task<Result> RegisterAsync(
+        RegisterRequest registerRequest,
+        CancellationToken cancellationToken);
 
-    Task<bool> RevokeRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken);
+    Task<Result> ConfirmEmailAsync(
+        ConfirmEmailReqest request,
+        CancellationToken cancellationToken);
 
+    Task<Result> ResendConfirmationEmailAsync(
+        ResendConfirmationEmailReqest resendConfirmation,
+        CancellationToken cancellationToken);
 
+    Task<Result<AuthResponse>> RefreshTokenAsync(
+        string token,
+        string refreshToken,
+        CancellationToken cancellationToken);
 
-
-
-
-
-
-
-
-
-
+    Task<Result> RevokeRefreshTokenAsync(
+        string token,
+        string refreshToken,
+        CancellationToken cancellationToken);
 }

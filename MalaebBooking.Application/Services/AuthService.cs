@@ -1,4 +1,6 @@
-﻿using MalaebBooking.Application.Contracts.Auth;
+﻿using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Contracts.Auth;
+using MalaebBooking.Application.Errors;
 using MalaebBooking.Domain.Entities;
 using MalaebBooking.Infrastructure.Authentication;
 using MalaebBooking.Infrastructure.Helper;
@@ -31,7 +33,7 @@ public class AuthService(UserManager<ApplicationUser> userManager,
 
 
 
-    public async Task<AuthResponse?> GetTokenAsync(
+    public async Task<Result<AuthResponse>> GetTokenAsync(
      string email,
      string password,
      CancellationToken cancellationToken)
@@ -39,32 +41,30 @@ public class AuthService(UserManager<ApplicationUser> userManager,
         var user = await _userManager.FindByEmailAsync(email);
 
         if (user is null)
-            return null;
+            return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
-        // 🚨 مهم جداً
         if (!user.EmailConfirmed)
-            throw new InvalidOperationException("Email is not confirmed.");
+            return Result.Failure<AuthResponse>(UserErrors.EmailNotConfirmed);
 
         var result = await signInManager.CheckPasswordSignInAsync(user, password, false);
 
         if (!result.Succeeded)
-            return null;
+            return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
         var (token, expiration) = jwtProvider.GenerateToken(user);
 
         var refreshToken = GenerateRefreshToken();
-        var refreshTokenExpiry = DateTime.UtcNow.AddDays(tokenExpiryDayes); // مثلاً، ممكن تجيبه من الإعدادات
+        var refreshTokenExpiry = DateTime.UtcNow.AddDays(tokenExpiryDayes);
 
         user.RefreshTokens.Add(new RefreshToken
         {
             Token = refreshToken,
             ExpiresOn = refreshTokenExpiry
         });
+
         await _userManager.UpdateAsync(user);
 
-
-
-        return new AuthResponse
+        var response = new AuthResponse
         {
             Id = user.Id,
             Name = user.UserName,
@@ -75,18 +75,20 @@ public class AuthService(UserManager<ApplicationUser> userManager,
             RefreshToken = refreshToken,
             RefreshTokenExpiration = refreshTokenExpiry
         };
+
+        return Result.Success(response);
     }
 
-    public async Task RegisterAsync(
-     RegisterRequest registerRequest,
-     CancellationToken cancellationToken)
-    {
-        // 1️⃣ Check if email already exists
-        var existingUser = await _userManager.FindByEmailAsync(registerRequest.Email);
-        if (existingUser is not null)
-            throw new InvalidOperationException("Email already exists.");
 
-        // 2️⃣ Create user
+    public async Task<Result> RegisterAsync(
+    RegisterRequest registerRequest,
+    CancellationToken cancellationToken)
+    {
+        var existingUser = await _userManager.FindByEmailAsync(registerRequest.Email);
+
+        if (existingUser is not null)
+            return Result.Failure(UserErrors.EmailAlreadyExists);
+
         var user = new ApplicationUser
         {
             UserName = registerRequest.Email,
@@ -98,140 +100,149 @@ public class AuthService(UserManager<ApplicationUser> userManager,
         var result = await _userManager.CreateAsync(user, registerRequest.Password);
 
         if (!result.Succeeded)
-            throw new InvalidOperationException(
-                string.Join(", ", result.Errors.Select(e => e.Description)));
+            return Result.Failure(
+                new Error("User.CreationFailed",
+                string.Join(", ", result.Errors.Select(e => e.Description))));
 
-        // 3️⃣ Generate Email Confirmation Token
         var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        emailToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailToken));
-        logger.LogInformation("Email confirmation token for user {Email}: {Token}", user.Email, emailToken);
 
+        emailToken = WebEncoders.Base64UrlEncode(
+            Encoding.UTF8.GetBytes(emailToken));
 
-        // هنا المفروض تبعت ايميل باللينك
-        // var confirmationLink = $"{yourUrl}/confirm-email?userId={user.Id}&token={emailToken}";
-        // await emailService.SendAsync(user.Email, confirmationLink);
-        // خذ الـ Origin من الهيدر لو موجود، لو مش موجود استخدم fallback URL
         var origin = httpContextAccessor.HttpContext?.Request.Headers["Origin"].FirstOrDefault()
                      ?? "https://yourfrontend.com";
 
-        // حضّر رابط التأكيد
-        var confirmationLink = $"{origin}/confirm-email?userId={user.Id}&code={emailToken}";
+        var confirmationLink =
+            $"{origin}/confirm-email?userId={user.Id}&code={emailToken}";
 
-        // حضّر محتوى الإيميل باستخدام الـ template والمتغيرات
         var emailBody = EmailBodyBuilder.GenerateEmailBody(
             "EmailConfirmation",
             new Dictionary<string, string>
             {
-        { "{{UserName}}", user.FirstName },
-        { "{{ConfirmationLink}}", confirmationLink },
-        { "{{Year}}", DateTime.UtcNow.Year.ToString() }
-            }
-        );
-        await emailSender.SendEmailAsync(user.Email, "Confirm your email", emailBody);
+            { "{{UserName}}", user.FirstName },
+            { "{{ConfirmationLink}}", confirmationLink },
+            { "{{Year}}", DateTime.UtcNow.Year.ToString() }
+            });
 
-        // مفيش return 👌
+        await emailSender.SendEmailAsync(
+            user.Email,
+            "Confirm your email",
+            emailBody);
+
+        return Result.Success();
     }
 
 
-
-    public async Task ConfirmEmailAsync(ConfirmEmailReqest request , CancellationToken cancellationToken)
+    public async Task<Result> ConfirmEmailAsync(
+    ConfirmEmailReqest request,
+    CancellationToken cancellationToken)
     {
-        // 1️⃣ تحقق إن المستخدم موجود
         var user = await userManager.FindByIdAsync(request.UserId);
+
         if (user is null)
-            throw new InvalidOperationException("Invalid user ID.");
+            return Result.Failure(UserErrors.UserNotFound);
 
-        // 2️⃣ تحقق إن الإيميل مش Confirmed قبل كده
         if (user.EmailConfirmed)
-            throw new InvalidOperationException("Email already confirmed.");
+            return Result.Failure(UserErrors.EmailAlreadyConfirmed);
 
-        // 3️⃣ فك التوكين
         string decodedToken;
+
         try
         {
-            decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Code));
+            decodedToken = Encoding.UTF8.GetString(
+                WebEncoders.Base64UrlDecode(request.Code));
         }
-        catch (FormatException)
+        catch
         {
-            throw new InvalidOperationException("Invalid token format.");
+            return Result.Failure(UserErrors.InvalidTokenFormat);
         }
 
-        // 4️⃣ Confirm Email
         var result = await userManager.ConfirmEmailAsync(user, decodedToken);
+
         if (!result.Succeeded)
-        {
-            var error = result.Errors.FirstOrDefault();
-            throw new InvalidOperationException(error != null
-                ? $"{error.Code}: {error.Description}"
-                : "Email confirmation failed.");
-        }
+            return Result.Failure(UserErrors.EmailConfirmationFailed);
 
-        // ✅ لو كله تمام، مفيش حاجة تتعمل، الميثود انتهت
+        return Result.Success();
     }
-
-    public async Task ResendConfirmationEmailAsync(ResendConfirmationEmailReqest resendConfirmation, CancellationToken cancellationToken)
+    public async Task<Result> ResendConfirmationEmailAsync(
+    ResendConfirmationEmailReqest resendConfirmation,
+    CancellationToken cancellationToken)
     {
         // 1️⃣ البحث عن المستخدم
-        var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == resendConfirmation.Email, cancellationToken);
-        if (user is null)
-            throw new InvalidOperationException("Email not found!");
+        var user = await _userManager.Users
+            .FirstOrDefaultAsync(u => u.Email == resendConfirmation.Email, cancellationToken);
 
-        // 2️⃣ توليد التوكين
+        if (user is null)
+            return Result.Failure(UserErrors.UserNotFound);
+
+        // 2️⃣ تحقق إن الإيميل مش Confirmed بالفعل
+        if (user.EmailConfirmed)
+            return Result.Failure(UserErrors.EmailAlreadyConfirmed);
+
+        // 3️⃣ توليد التوكين
         var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-        // 3️⃣ تشفير التوكين لـ URL
-        var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailToken));
+        // 4️⃣ تشفير التوكين
+        var encodedToken = WebEncoders.Base64UrlEncode(
+            Encoding.UTF8.GetBytes(emailToken));
 
-        // 4️⃣ تسجيل التوكين في الـ logs (ممكن تبعته في الإيميل بعد كده)
-        logger.LogInformation("Email confirmation token for user {Email}: {Token}", user.Email, encodedToken);
+        // 5️⃣ تسجيل التوكين في الـ logs
+        logger.LogInformation(
+            "Email confirmation token for user {Email}: {Token}",
+            user.Email,
+            encodedToken);
 
-        // 5️⃣ لو عندك Email Service:
-        // var confirmationLink = $"{yourFrontendUrl}/confirm-email?userId={user.Id}&code={encodedToken}";
-        // await emailService.SendAsync(user.Email, "Confirm your email", confirmationLink, cancellationToken);
+        var origin = httpContextAccessor.HttpContext?
+            .Request.Headers["Origin"]
+            .FirstOrDefault() ?? "https://yourfrontend.com";
 
-        var origin = httpContextAccessor.HttpContext?.Request.Headers["Origin"].FirstOrDefault()
-                    ?? "https://yourfrontend.com";
+        // 6️⃣ إنشاء رابط التأكيد
+        var confirmationLink =
+            $"{origin}/confirm-email?userId={user.Id}&code={encodedToken}";
 
-        // حضّر رابط التأكيد
-        var confirmationLink = $"{origin}/confirm-email?userId={user.Id}&code={emailToken}";
-
-        // حضّر محتوى الإيميل باستخدام الـ template والمتغيرات
+        // 7️⃣ تجهيز محتوى الإيميل
         var emailBody = EmailBodyBuilder.GenerateEmailBody(
             "EmailConfirmation",
             new Dictionary<string, string>
             {
-        {"{{UserName}}", user.FirstName },
-        { "{{ConfirmationLink}}", confirmationLink },
-        { "{{Year}}", DateTime.UtcNow.Year.ToString() }
-            }
-        );
-        await emailSender.SendEmailAsync(user.Email, "Confirm your email", emailBody);
+            {"{{UserName}}", user.FirstName },
+            {"{{ConfirmationLink}}", confirmationLink },
+            {"{{Year}}", DateTime.UtcNow.Year.ToString() }
+            });
 
+        await emailSender.SendEmailAsync(
+            user.Email,
+            "Confirm your email",
+            emailBody);
+
+        return Result.Success();
     }
 
-    public async Task<AuthResponse?> RefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken)
+    public async Task<Result<AuthResponse>> RefreshTokenAsync(
+     string token,
+     string refreshToken,
+     CancellationToken cancellationToken)
     {
         var userId = jwtProvider.ValidateToken(token);
+
         if (userId is null)
-            return null;
+            return Result.Failure<AuthResponse>(UserErrors.InvalidToken);
 
         var user = await _userManager.FindByIdAsync(userId);
+
         if (user is null)
-            return null;
+            return Result.Failure<AuthResponse>(UserErrors.UserNotFound);
 
         var userRefreshToken = user.RefreshTokens
             .FirstOrDefault(rt => rt.Token == refreshToken && rt.IsActive);
 
         if (userRefreshToken is null)
-            return null;
+            return Result.Failure<AuthResponse>(UserErrors.RefreshTokenNotFound);
 
-        // revoke old refresh token
         userRefreshToken.RevokedOn = DateTime.UtcNow;
 
-        // generate new jwt
         var (newToken, expiration) = jwtProvider.GenerateToken(user);
 
-        // generate new refresh token
         var newRefreshToken = GenerateRefreshToken();
         var refreshTokenExpiry = DateTime.UtcNow.AddDays(tokenExpiryDayes);
 
@@ -243,7 +254,7 @@ public class AuthService(UserManager<ApplicationUser> userManager,
 
         await _userManager.UpdateAsync(user);
 
-        return new AuthResponse
+        var response = new AuthResponse
         {
             Id = user.Id,
             Name = user.UserName,
@@ -254,31 +265,36 @@ public class AuthService(UserManager<ApplicationUser> userManager,
             RefreshToken = newRefreshToken,
             RefreshTokenExpiration = refreshTokenExpiry
         };
+
+        return Result.Success(response);
     }
-    public async Task<bool> RevokeRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken)
+    public async Task<Result> RevokeRefreshTokenAsync(
+     string token,
+     string refreshToken,
+     CancellationToken cancellationToken)
     {
         var userId = jwtProvider.ValidateToken(token);
+
         if (userId is null)
-            return false;
+            return Result.Failure(UserErrors.InvalidToken);
 
         var user = await _userManager.FindByIdAsync(userId);
+
         if (user is null)
-            return false;
+            return Result.Failure(UserErrors.UserNotFound);
 
         var userRefreshToken = user.RefreshTokens
             .FirstOrDefault(rt => rt.Token == refreshToken && rt.IsActive);
+
         if (userRefreshToken is null)
-            return false;
+            return Result.Failure(UserErrors.RefreshTokenNotFound);
 
         userRefreshToken.RevokedOn = DateTime.UtcNow;
+
         await _userManager.UpdateAsync(user);
-        return true;
 
-
-
+        return Result.Success();
     }
-
-
     private static string GenerateRefreshToken()
     {
         return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
