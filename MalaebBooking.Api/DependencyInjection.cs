@@ -1,16 +1,19 @@
 ﻿using FluentValidation;
 using MalaebBooking.Application;
+using MalaebBooking.Infrastructure.Mail;
 using MalaebBooking.Application.Services;
 using MalaebBooking.Domain.Abstractions.Repositories;
 using MalaebBooking.Domain.Entities;
 using MalaebBooking.Infrastructure;
 using MalaebBooking.Infrastructure.Authentication;
+using MalaebBooking.Infrastructure.Mail;
 using MalaebBooking.Infrastructure.Persistence;
 using MalaebBooking.Infrastructure.Repositories;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -47,6 +50,9 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddInfrastructure(configuration);
+        services.Configure<MailSetting>(configuration.GetSection(nameof(MailSetting)));
+        services.AddHttpContextAccessor();
+
         return services;
     }
 
@@ -58,6 +64,8 @@ public static class DependencyInjection
     {
         services.AddScoped<ISportTypeRepository, SportTypeRepository>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IEmailSender, EmailService>();
+
         return services;
     }
 

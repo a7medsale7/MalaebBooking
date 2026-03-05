@@ -29,8 +29,12 @@ public static class InfrastructureDependencyInjection
             options.Password.RequireUppercase = false;
             options.Password.RequiredLength = 6;
 
+
             // إعدادات الحساب
             options.User.RequireUniqueEmail = true;
+
+            //options.SignIn.RequireConfirmedEmail = true;
+
         })
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();

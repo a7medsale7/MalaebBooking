@@ -23,4 +23,37 @@ public class AuthController(IAuthService authService) : ControllerBase
 
         return Ok(authRequest);
     }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register(
+     RegisterRequest request,
+     CancellationToken cancellationToken)
+    {
+        await authService.RegisterAsync(request, cancellationToken);
+
+        return Ok(new
+        {
+            message = "Registration successful. Please check your email to confirm your account."
+        });
+    }
+
+    [HttpPost("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail(ConfirmEmailReqest request, CancellationToken cancellationToken)
+    {
+        await authService.ConfirmEmailAsync(request, cancellationToken);
+        return Ok(new
+        {
+            message = "Email confirmed successfully. You can now log in."
+        });
+    }
+
+    [HttpPost("resend-confirmation-email")]
+    public async Task<IActionResult> ResendConfirmationEmail(ResendConfirmationEmailReqest request, CancellationToken cancellationToken)
+    {
+        await authService.ResendConfirmationEmailAsync(request, cancellationToken);
+        return Ok(new
+        {
+            message = "If an account with that email exists, a confirmation email has been resent."
+        });
+    }
 }
