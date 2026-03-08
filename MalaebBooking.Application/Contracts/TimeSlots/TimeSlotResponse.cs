@@ -5,6 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace MalaebBooking.Application.Contracts.TimeSlots;
-internal class TimeSlotResponse
+
+public class TimeSlotResponse
 {
+    public int Id { get; set; }
+    public DateOnly Date { get; set; }
+    public TimeOnly StartTime { get; set; }
+    public TimeOnly EndTime { get; set; }
+    public string Status { get; set; } = string.Empty;
 }

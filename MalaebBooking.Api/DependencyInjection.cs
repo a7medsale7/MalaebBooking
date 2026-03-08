@@ -20,6 +20,7 @@ using Microsoft.IdentityModel.Tokens;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using System.Reflection;
 using System.Text;
+using MalaebBooking.Api.Middleware;
 
 namespace MalaebBooking.Api;
 
@@ -38,6 +39,8 @@ public static class DependencyInjection
             .AddMapsterConfiguration()
             .AddFluentValidationConfiguration()
             .AddAuthenticationConfiguration(configuration);
+
+
 
         return services;
     }
@@ -63,6 +66,11 @@ public static class DependencyInjection
         this IServiceCollection services)
     {
         services.AddScoped<ISportTypeRepository, SportTypeRepository>();
+        services.AddScoped<IStadiumRepository, StadiumRepository>();
+        services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddProblemDetails();
+
+
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IEmailSender, EmailService>();
 
@@ -76,6 +84,7 @@ public static class DependencyInjection
         this IServiceCollection services)
     {
         services.AddScoped<ISportTypeService, SportTypeService>();
+        services.AddScoped<IStadiumService, StadiumService>();
         return services;
     }
 

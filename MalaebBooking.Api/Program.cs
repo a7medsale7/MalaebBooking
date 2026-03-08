@@ -1,4 +1,5 @@
 ﻿using MalaebBooking.Api;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Register All Dependencies
 // ================================
 builder.Services.AddApiDependencies(builder.Configuration);
+
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration));
 
 // ================================
 // Build App
@@ -31,5 +35,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseExceptionHandler();
 
 app.Run();

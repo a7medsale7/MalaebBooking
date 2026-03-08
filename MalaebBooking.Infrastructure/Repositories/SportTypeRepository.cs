@@ -31,7 +31,13 @@ public async Task<SportType?> GetByIdAsync(int id, CancellationToken cancellatio
 
 public async Task AddAsync(SportType sportType, CancellationToken cancellationToken)
 {
-    await _context.SportTypes.AddAsync(sportType, cancellationToken);
+        var exists = await _context.SportTypes
+        .AnyAsync(x => x.Name == sportType.Name && x.IsActive, cancellationToken);
+
+       
+
+
+        await _context.SportTypes.AddAsync(sportType, cancellationToken);
     await _context.SaveChangesAsync(cancellationToken);
 }
 
