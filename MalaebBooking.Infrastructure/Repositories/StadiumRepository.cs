@@ -30,29 +30,34 @@ public class StadiumRepository(ApplicationDbContext context) : IStadiumRepositor
     public async Task<List<Stadium>> GetActiveAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Stadiums
-            .AsNoTracking()
-            .Where(x => x.IsActive)
-            .ToListAsync(cancellationToken);
+     .AsNoTracking()
+     .Include(s => s.Images) // ✅ زود
+     .Where(x => x.IsActive)
+     .ToListAsync(cancellationToken);
     }
     public async Task<List<Stadium>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Stadiums
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
+    .AsNoTracking()
+    .Include(s => s.Images) // ✅ زود
+    .ToListAsync(cancellationToken);
+
     }
 
     public async Task<Stadium?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _context.Stadiums
-         .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+     .Include(s => s.Images) // ✅ زود
+     .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
     public async Task<List<Stadium>> GetBySportTypeAsync(int sportTypeId, CancellationToken cancellationToken = default)
     {
         return await _context.Stadiums
-            .AsNoTracking()
-            .Where(x => x.SportTypeId == sportTypeId && x.IsActive)
-            .ToListAsync(cancellationToken);
+     .AsNoTracking()
+     .Include(s => s.Images) // ✅ زود
+     .Where(x => x.SportTypeId == sportTypeId && x.IsActive)
+     .ToListAsync(cancellationToken);
     }
 
     public Task<Stadium?> GetDetailsAsync(int id, CancellationToken cancellationToken = default)

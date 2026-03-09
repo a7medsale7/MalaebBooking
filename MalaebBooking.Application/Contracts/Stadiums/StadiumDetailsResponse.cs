@@ -28,7 +28,7 @@ public class StadiumDetailsResponse
     public string OwnerId { get; set; } = string.Empty;
     public string? OwnerName { get; set; }
 
-    public List<string>? ImageUrls { get; set; }
+    public List<StadiumImageResponse>? Images { get; set; }
 
     // Related Collections
     public List<TimeSlotResponse>? TimeSlots { get; set; }

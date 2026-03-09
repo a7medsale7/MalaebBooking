@@ -18,13 +18,12 @@ public class StadiumService(IStadiumRepository stadiumRepository, UserManager<Ap
     // ================== CREATE STADIUM ==================
     public async Task<Result> CreateStadiumAsync(
         CreateStadiumRequest request,
-        string currentUserId, // جديد: نمرر ID صاحب الستاد
+        string currentUserId,
         CancellationToken cancellationToken = default)
     {
         if (request is null)
             return Result.Failure(StadiumErrors.InvalidData);
 
-        // Basic Validations
         if (string.IsNullOrWhiteSpace(request.Name))
             return Result.Failure(StadiumErrors.NameRequired);
         if (request.Name.Length > 200)
@@ -40,7 +39,6 @@ public class StadiumService(IStadiumRepository stadiumRepository, UserManager<Ap
         if (request.SportTypeId <= 0)
             return Result.Failure(StadiumErrors.SportTypeIdInvalid);
 
-        // إنشاء الستاد وربطه بالمالك
         var stadium = request.Adapt<Stadium>();
         stadium.OwnerId = currentUserId;
 
@@ -57,7 +55,15 @@ public class StadiumService(IStadiumRepository stadiumRepository, UserManager<Ap
         if (stadiums is null || !stadiums.Any())
             return Result.Failure<List<StadiumResponse>>(StadiumErrors.NotFound);
 
-        var stadiumsResponse = stadiums.Adapt<List<StadiumResponse>>();
+        var stadiumsResponse = stadiums.Select(stadium =>
+        {
+            var response = stadium.Adapt<StadiumResponse>();
+            response.Images = stadium.Images
+                .Select(i => i.Adapt<StadiumImageResponse>())
+                .ToList();
+            return response;
+        }).ToList();
+
         foreach (var st in stadiumsResponse)
         {
             var owner = await userManager.FindByIdAsync(st.OwnerId);
@@ -76,7 +82,15 @@ public class StadiumService(IStadiumRepository stadiumRepository, UserManager<Ap
         if (stadiums is null || !stadiums.Any())
             return Result.Failure<List<StadiumResponse>>(StadiumErrors.NotFound);
 
-        var stadiumsResponse = stadiums.Adapt<List<StadiumResponse>>();
+        var stadiumsResponse = stadiums.Select(stadium =>
+        {
+            var response = stadium.Adapt<StadiumResponse>();
+            response.Images = stadium.Images
+                .Select(i => i.Adapt<StadiumImageResponse>())
+                .ToList();
+            return response;
+        }).ToList();
+
         foreach (var st in stadiumsResponse)
         {
             var owner = await userManager.FindByIdAsync(st.OwnerId);
@@ -99,6 +113,10 @@ public class StadiumService(IStadiumRepository stadiumRepository, UserManager<Ap
             return Result.Failure<StadiumResponse>(StadiumErrors.NotFound);
 
         var response = stadium.Adapt<StadiumResponse>();
+        response.Images = stadium.Images
+            .Select(i => i.Adapt<StadiumImageResponse>())
+            .ToList();
+
         var owner = await userManager.FindByIdAsync(stadium.OwnerId);
         response.OwnerName = owner?.UserName ?? string.Empty;
 
@@ -107,8 +125,8 @@ public class StadiumService(IStadiumRepository stadiumRepository, UserManager<Ap
 
     // ================== GET STADIUM DETAILS ==================
     public async Task<Result<StadiumDetailsResponse>> GetStadiumDetailsAsync(
-     int stadiumId,
-     CancellationToken cancellationToken = default)
+        int stadiumId,
+        CancellationToken cancellationToken = default)
     {
         if (stadiumId <= 0)
             return Result.Failure<StadiumDetailsResponse>(StadiumErrors.InvalidId);
@@ -117,24 +135,25 @@ public class StadiumService(IStadiumRepository stadiumRepository, UserManager<Ap
         if (stadium is null)
             return Result.Failure<StadiumDetailsResponse>(StadiumErrors.NotFound);
 
-        // إعداد الـ Mapster لكل الحقول اللي محتاجة MapWith
         TypeAdapterConfig<Stadium, StadiumDetailsResponse>.NewConfig()
             .Map(dest => dest.TimeSlots, src => src.TimeSlots
                 .Select(ts => ts.Adapt<TimeSlotResponse>())
                 .ToList())
             .Map(dest => dest.Reviews, src => src.Reviews
                 .Select(r => r.Adapt<ReviewResponse>())
+                .ToList())
+            .Map(dest => dest.Images, src => src.Images
+                .Select(i => i.Adapt<StadiumImageResponse>())
                 .ToList());
 
-        // تحويل الـ Stadium إلى StadiumDetailsResponse
         var response = stadium.Adapt<StadiumDetailsResponse>();
 
-        // إضافة اسم صاحب الملعب
         var owner = await userManager.FindByIdAsync(stadium.OwnerId);
         response.OwnerName = owner?.UserName ?? string.Empty;
 
         return Result.Success(response);
     }
+
     // ================== GET STADIUMS BY SPORT TYPE ==================
     public async Task<Result<List<StadiumResponse>>> GetStadiumsBySportTypeAsync(
         int sportTypeId,
@@ -147,7 +166,15 @@ public class StadiumService(IStadiumRepository stadiumRepository, UserManager<Ap
         if (stadiums is null || !stadiums.Any())
             return Result.Failure<List<StadiumResponse>>(StadiumErrors.NotFound);
 
-        var stadiumsResponse = stadiums.Adapt<List<StadiumResponse>>();
+        var stadiumsResponse = stadiums.Select(stadium =>
+        {
+            var response = stadium.Adapt<StadiumResponse>();
+            response.Images = stadium.Images
+                .Select(i => i.Adapt<StadiumImageResponse>())
+                .ToList();
+            return response;
+        }).ToList();
+
         foreach (var st in stadiumsResponse)
         {
             var owner = await userManager.FindByIdAsync(st.OwnerId);
@@ -179,7 +206,7 @@ public class StadiumService(IStadiumRepository stadiumRepository, UserManager<Ap
     public async Task<Result> UpdateStadiumAsync(
         int stadiumId,
         UpdateStadiumRequest request,
-        string currentUserId, // جديد: نتأكد إن اللي بيعدل هو المالك
+        string currentUserId,
         CancellationToken cancellationToken = default)
     {
         if (stadiumId <= 0)
@@ -191,11 +218,9 @@ public class StadiumService(IStadiumRepository stadiumRepository, UserManager<Ap
         if (stadium is null)
             return Result.Failure(StadiumErrors.NotFound);
 
-        // التأكد إن المالك هو اللي بيعدل
         if (stadium.OwnerId != currentUserId)
             return Result.Failure(StadiumErrors.NotAuthorized);
 
-        // Optional Validations (مثل Create)
         if (!string.IsNullOrWhiteSpace(request.Name) && request.Name.Length > 200)
             return Result.Failure(StadiumErrors.NameTooLong);
         if (request.ClosingTime <= request.OpeningTime)

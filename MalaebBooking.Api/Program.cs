@@ -11,6 +11,19 @@ builder.Services.AddApiDependencies(builder.Configuration);
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
 
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+
 // ================================
 // Build App
 // ================================
@@ -29,7 +42,12 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseCors("AllowAll");
+
+
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -67,12 +67,16 @@ public static class DependencyInjection
     {
         services.AddScoped<ISportTypeRepository, SportTypeRepository>();
         services.AddScoped<IStadiumRepository, StadiumRepository>();
+        services.AddScoped<IStadiumImageRepository, StadiumImageRepository>();
+
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
 
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IEmailSender, EmailService>();
+        services.AddScoped<IStadiumImageService, StadiumImageService>();
+
 
         return services;
     }

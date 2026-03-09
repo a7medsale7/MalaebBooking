@@ -18,31 +18,25 @@ public class SportTypesController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var result = await _service.GetAllAsync(cancellationToken);
 
         if (result.IsFailure)
-            return BadRequest(new
-            {
-                result.Error.Code,
-                result.Error.Description
-            });
+            return BadRequest(new { result.Error.Code, result.Error.Description });
 
         return Ok(result.Value);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
         var result = await _service.GetByIdAsync(id, cancellationToken);
 
         if (result.IsFailure)
-            return NotFound(new
-            {
-                result.Error.Code,
-                result.Error.Description
-            });
+            return NotFound(new { result.Error.Code, result.Error.Description });
 
         return Ok(result.Value);
     }
@@ -55,11 +49,7 @@ public class SportTypesController : ControllerBase
         var result = await _service.AddAsync(request, cancellationToken);
 
         if (result.IsFailure)
-            return BadRequest(new
-            {
-                result.Error.Code,
-                result.Error.Description
-            });
+            return BadRequest(new { result.Error.Code, result.Error.Description });
 
         return CreatedAtAction(
             nameof(GetById),
@@ -67,7 +57,7 @@ public class SportTypesController : ControllerBase
             result.Value);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(
         int id,
         [FromBody] UpdateSportTypeRequest request,
@@ -76,16 +66,12 @@ public class SportTypesController : ControllerBase
         var result = await _service.UpdateAsync(id, request, cancellationToken);
 
         if (result.IsFailure)
-            return NotFound(new
-            {
-                result.Error.Code,
-                result.Error.Description
-            });
+            return NotFound(new { result.Error.Code, result.Error.Description });
 
         return Ok(result.Value);
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     public async Task<IActionResult> SoftDelete(
         int id,
         CancellationToken cancellationToken)
@@ -93,11 +79,23 @@ public class SportTypesController : ControllerBase
         var result = await _service.SoftDeleteAsync(id, cancellationToken);
 
         if (result.IsFailure)
-            return NotFound(new
-            {
-                result.Error.Code,
-                result.Error.Description
-            });
+            return NotFound(new { result.Error.Code, result.Error.Description });
+
+        return Ok(result.Value);
+    }
+
+    // ================== UPLOAD ICON ==================
+    [HttpPost("{id:int}/icon")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadIcon(
+        int id,
+        [FromForm] UploadSportTypeIconRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _service.UploadIconAsync(id, request, cancellationToken); // ✅ مصحح
+
+        if (result.IsFailure)
+            return BadRequest(new { result.Error.Code, result.Error.Description });
 
         return Ok(result.Value);
     }

@@ -24,4 +24,8 @@ public interface ISportTypeService
     Task<Result<SportTypeResponse>> SoftDeleteAsync(
         int id,
         CancellationToken cancellationToken = default);
+    Task<Result<SportTypeResponse>> UploadIconAsync(
+       int id,
+       UploadSportTypeIconRequest request,
+       CancellationToken cancellationToken = default);
 }

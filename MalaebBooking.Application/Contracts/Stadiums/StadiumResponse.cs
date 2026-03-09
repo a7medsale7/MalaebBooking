@@ -1,4 +1,6 @@
-﻿public class StadiumResponse
+﻿using MalaebBooking.Application.Contracts.Stadiums;
+
+public class StadiumResponse
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -22,5 +24,5 @@
     public string OwnerId { get; set; } = string.Empty;
     public string OwnerName { get; set; } = string.Empty;
 
-    public List<string>? ImageUrls { get; set; }
+    public List<StadiumImageResponse>? Images { get; set; }
 }
