@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MalaebBooking.Application.Contracts.Bookings;
-internal class CreateBookingRequest
+
+public class CreateBookingRequest
 {
+    // بنحتاج بس نعرف التايم سلوت اللي هينحجز
+    public int TimeSlotId { get; set; }
 }

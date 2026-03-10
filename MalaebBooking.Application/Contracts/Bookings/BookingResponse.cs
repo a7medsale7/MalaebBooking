@@ -1,10 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MalaebBooking.Domain.Enums;
+using System.Text.Json.Serialization;
 
 namespace MalaebBooking.Application.Contracts.Bookings;
-internal class BookingResponse
+
+public class BookingResponse
 {
+    public int Id { get; set; }
+    public int TimeSlotId { get; set; }
+    public string PlayerId { get; set; } = string.Empty;
+    public decimal TotalPrice { get; set; }
+
+    // يفضل ترجيعها كـ String في الـ JSON بدل رقم
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public BookingStatus Status { get; set; }
+
+    public DateTime CreatedOn { get; set; }
+    public DateTime ExpiresAt { get; set; }
 }
