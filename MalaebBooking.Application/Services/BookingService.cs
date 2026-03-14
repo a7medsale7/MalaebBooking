@@ -5,9 +5,10 @@ using MalaebBooking.Domain.Abstractions.Repositories;
 using MalaebBooking.Domain.Entities;
 using MalaebBooking.Domain.Enums;
 using Mapster;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Hangfire;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace MalaebBooking.Application.Services;
 
@@ -16,15 +17,18 @@ public class BookingService : IBookingService
     private readonly IBookingRepository _bookingRepository;
     private readonly ITimeSlotRepository _timeSlotRepository;
     private readonly IStadiumRepository _stadiumRepository; // محتاجينه عشان السعر
+    private readonly IEmailSender _emailSender;
 
     public BookingService(
         IBookingRepository bookingRepository,
         ITimeSlotRepository timeSlotRepository,
-        IStadiumRepository stadiumRepository)
+        IStadiumRepository stadiumRepository,
+        IEmailSender emailSender)
     {
         _bookingRepository = bookingRepository;
         _timeSlotRepository = timeSlotRepository;
         _stadiumRepository = stadiumRepository;
+        _emailSender = emailSender;
     }
 
     public async Task<Result<BookingResponse>> CreateBookingAsync(CreateBookingRequest request, string playerId)
@@ -88,6 +92,22 @@ public class BookingService : IBookingService
         {
             timeSlot.Status = SlotStatus.Available;
             await _timeSlotRepository.UpdateAsync(timeSlot);
+        }
+
+        // 3. إرسال إيميل لصاحب الملعب في الخلفية
+        if (booking.TimeSlot?.Stadium?.Owner?.Email != null)
+        {
+            var ownerEmail = booking.TimeSlot.Stadium.Owner.Email;
+            var stadiumName = booking.TimeSlot.Stadium.Name;
+            var playerName = booking.Player != null ? $"{booking.Player.FirstName} {booking.Player.LastName}" : "لاعب";
+            var date = booking.TimeSlot.Date.ToString("yyyy-MM-dd");
+            var time = $"{booking.TimeSlot.StartTime} - {booking.TimeSlot.EndTime}";
+
+            BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(
+                ownerEmail,
+                "⚠️ إلغاء حجز",
+                $"أهلاً بك،<br>قام اللاعب <b>{playerName}</b> بإلغاء حجزه في ملعب <b>{stadiumName}</b>.<br>الموعد المُلغى: {date} من {time}.<br><b>السبب:</b> {cancellationReason}<br>تم إعادة فتح الميعاد ليحجزه لاعب آخر."
+            ));
         }
 
         return Result.Success();

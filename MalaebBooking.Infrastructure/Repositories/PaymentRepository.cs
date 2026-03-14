@@ -1,5 +1,6 @@
 ﻿using MalaebBooking.Domain.Abstractions.Repositories;
 using MalaebBooking.Domain.Entities;
+using MalaebBooking.Domain.Enums;
 using MalaebBooking.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -36,6 +37,8 @@ public class PaymentRepository : IPaymentRepository
             .Include(p => p.Booking)
                 .ThenInclude(b => b.TimeSlot)
                     .ThenInclude(t => t.Stadium)
+            .Include(p => p.Booking)
+                .ThenInclude(b => b.Player)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
     // ================== GET BY BOOKING ID ==================
@@ -45,6 +48,8 @@ public class PaymentRepository : IPaymentRepository
             .Include(p => p.Booking)
                 .ThenInclude(b => b.TimeSlot)
                     .ThenInclude(t => t.Stadium)
+            .Include(p => p.Booking)
+                .ThenInclude(b => b.Player)
             .FirstOrDefaultAsync(p => p.BookingId == bookingId);
     }
     // ================== CHECK IF EXISTS ==================
@@ -53,4 +58,14 @@ public class PaymentRepository : IPaymentRepository
         return await _context.Payments
             .AnyAsync(p => p.BookingId == bookingId);
     }
+
+    public async Task<IEnumerable<Payment>> GetPaymentsOlderThanAsync(DateTime date)
+    {
+        // هنجيب المدفوعات اللي تمت الموافقة عليها أو اترفضت من زمان
+        return await _context.Payments
+            .Where(p => (p.Status == PaymentStatus.Approved && p.ApprovedAt <= date) ||
+                        (p.Status == PaymentStatus.Rejected && p.RejectedAt <= date))
+            .ToListAsync();
+    }
+
 }

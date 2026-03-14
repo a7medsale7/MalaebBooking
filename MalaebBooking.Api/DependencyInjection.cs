@@ -1,7 +1,9 @@
 ﻿using FluentValidation;
+using Hangfire;
+using MalaebBooking.Api.Middleware;
 using MalaebBooking.Application;
-using MalaebBooking.Infrastructure.Mail;
 using MalaebBooking.Application.Services;
+using MalaebBooking.Application.Services.HangJobs;
 using MalaebBooking.Domain.Abstractions.Repositories;
 using MalaebBooking.Domain.Entities;
 using MalaebBooking.Infrastructure;
@@ -20,7 +22,6 @@ using Microsoft.IdentityModel.Tokens;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using System.Reflection;
 using System.Text;
-using MalaebBooking.Api.Middleware;
 
 namespace MalaebBooking.Api;
 
@@ -38,9 +39,8 @@ public static class DependencyInjection
             .AddSwaggerDocumentation()
             .AddMapsterConfiguration()
             .AddFluentValidationConfiguration()
-            .AddAuthenticationConfiguration(configuration);
-
-
+            .AddAuthenticationConfiguration(configuration)
+            .AddHangfireConfig(configuration);
 
         return services;
     }
@@ -68,7 +68,7 @@ public static class DependencyInjection
         services.AddScoped<ISportTypeRepository, SportTypeRepository>();
         services.AddScoped<IStadiumRepository, StadiumRepository>();
         services.AddScoped<IStadiumImageRepository, StadiumImageRepository>();
-        services.AddScoped<ITimeSlotRepository ,  TimeSlotRepository>();
+        services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IReviewRepository, ReviewRepository>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
@@ -76,11 +76,9 @@ public static class DependencyInjection
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
 
-
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IEmailSender, EmailService>();
         services.AddScoped<IStadiumImageService, StadiumImageService>();
-
 
         return services;
     }
@@ -94,9 +92,12 @@ public static class DependencyInjection
         services.AddScoped<ISportTypeService, SportTypeService>();
         services.AddScoped<IStadiumService, StadiumService>();
         services.AddScoped<ITimeSlotService, TimeSlotService>();
-        services.AddScoped<IBookingService,BookingService>();
+        services.AddScoped<IBookingService, BookingService>();
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<IPaymentService, PaymentService>();
+
+        // 👈 إضافة المهام المجدولة للـ Dependency Injection
+        services.AddScoped<BookingBackgroundJobs>();
 
         return services;
     }
@@ -188,4 +189,22 @@ public static class DependencyInjection
 
         return services;
     }
+
+    // ================================
+    // Hangfire Configuration
+    // ================================
+    private static IServiceCollection AddHangfireConfig(
+       this IServiceCollection services,
+       IConfiguration configuration)
+    {
+
+        services.AddHangfire(config => config
+      .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+      .UseSimpleAssemblyNameTypeSerializer()
+      .UseRecommendedSerializerSettings()
+      .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection"))); // أو DefaultConnection حسب إنت مسجل الداتا بيس بتاعتك فين
+
+        return services;
+    }
+
 }

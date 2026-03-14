@@ -33,6 +33,7 @@ public class BookingRepository : IBookingRepository
             .Include(x => x.Player)
             .Include(x => x.TimeSlot)
                 .ThenInclude(t => t.Stadium)
+                    .ThenInclude(s => s.Owner)
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
@@ -137,5 +138,41 @@ public class BookingRepository : IBookingRepository
         );
     }
 
-   
+    public async Task<IEnumerable<Booking>> GetConfirmedBookingsInPastAsync()
+    {
+        var now = TimeOnly.FromDateTime(DateTime.UtcNow);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        return await _context.Bookings
+            .Include(x => x.TimeSlot)
+            .Where(x => x.Status == BookingStatus.Confirmed &&
+                       (x.TimeSlot.Date < today || (x.TimeSlot.Date == today && x.TimeSlot.EndTime <= now)))
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Booking>> GetExpiredPendingBookingsAsync()
+    {
+        var now = DateTime.UtcNow;
+        return await _context.Bookings
+            .Include(x => x.TimeSlot)
+            .Where(x => x.Status == BookingStatus.Pending && x.ExpiresAt <= now)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Booking>> GetUpcomingBookingsAsync(TimeSpan timeAhead)
+    {
+        var targetTime = DateTime.UtcNow.Add(timeAhead);
+        var targetDate = DateOnly.FromDateTime(targetTime);
+        var targetTimeOnly = TimeOnly.FromDateTime(targetTime);
+
+        return await _context.Bookings
+            .Include(x => x.TimeSlot)
+                .ThenInclude(t => t.Stadium)
+            .Include(x => x.Player)
+            .Where(x => x.Status == BookingStatus.Confirmed &&
+                        x.TimeSlot.Date == targetDate &&
+                        x.TimeSlot.StartTime == targetTimeOnly) // بيقيس الميعاد بالساعة بالظبط
+            .ToListAsync();
+    }
+
 }

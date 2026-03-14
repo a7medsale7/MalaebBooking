@@ -5,17 +5,21 @@ using MalaebBooking.Domain.Abstractions.Repositories;
 using MalaebBooking.Domain.Entities;
 using MalaebBooking.Domain.Enums;
 using Microsoft.AspNetCore.Hosting;
+using Hangfire;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace MalaebBooking.Application.Services;
 
 public class PaymentService(
     IPaymentRepository paymentRepository,
     IBookingRepository bookingRepository,
-    IWebHostEnvironment env) : IPaymentService
+    IWebHostEnvironment env,
+    IEmailSender emailSender) : IPaymentService
 {
     private readonly IPaymentRepository _paymentRepository = paymentRepository;
     private readonly IBookingRepository _bookingRepository = bookingRepository;
     private readonly IWebHostEnvironment _env = env;
+    private readonly IEmailSender _emailSender = emailSender;
 
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
     private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5MB
@@ -174,6 +178,21 @@ public class PaymentService(
         booking.ConfirmedAt = DateTime.UtcNow;
         await _bookingRepository.UpdateAsync(booking);
 
+        // 3. إرسال إيميل تأكيد في الخلفية
+        if (booking.Player?.Email != null)
+        {
+            var stadiumName = booking.TimeSlot.Stadium.Name;
+            var playerEmail = booking.Player.Email;
+            var date = booking.TimeSlot.Date.ToString("yyyy-MM-dd");
+            var time = $"{booking.TimeSlot.StartTime} - {booking.TimeSlot.EndTime}";
+            
+            BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(
+                playerEmail,
+                "✅ تأكيد حجزك في ملاعب",
+                $"أهلاً بك،<br>تم تأكيد حجزك في ملعب <b>{stadiumName}</b>.<br>الموعد: {date} من {time}.<br>نتمنى لك وقتاً ممتعاً!"
+            ));
+        }
+
         return Result.Success();
     }
 
@@ -200,6 +219,20 @@ public class PaymentService(
         payment.RejectedAt = DateTime.UtcNow;
         payment.RejectionReason = request.RejectionReason;
         await _paymentRepository.UpdateAsync(payment);
+
+        // إرسال إيميل رفض في الخلفية
+        var booking = payment.Booking;
+        if (booking.Player?.Email != null)
+        {
+            var stadiumName = booking.TimeSlot.Stadium.Name;
+            var playerEmail = booking.Player.Email;
+            
+            BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(
+                playerEmail,
+                "❌ تم رفض إيصال الدفع",
+                $"أهلاً بك،<br>تم رفض إيصال الدفع الخاص بحجزك في ملعب <b>{stadiumName}</b>.<br><b>السبب:</b> {request.RejectionReason}<br>يرجى إعادة رفع إيصال صحيح."
+            ));
+        }
 
         // الحجز يفضل Pending عشان اللاعب يقدر يرفع إيصال تاني
         return Result.Success();

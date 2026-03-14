@@ -1,4 +1,5 @@
-﻿using MalaebBooking.Application.Abstractions.Result;
+﻿using Hangfire; // 👈 إضافة Hangfire
+using MalaebBooking.Application.Abstractions.Result;
 using MalaebBooking.Application.Contracts.Auth;
 using MalaebBooking.Application.Errors;
 using MalaebBooking.Domain.Entities;
@@ -17,7 +18,7 @@ namespace MalaebBooking.Application.Services;
 
 public class AuthService(UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
-    IJwtProvider jwtProvider ,
+    IJwtProvider jwtProvider,
     ILogger<AuthService> logger,
     IEmailSender emailSender,
     IHttpContextAccessor httpContextAccessor) : IAuthService
@@ -29,9 +30,7 @@ public class AuthService(UserManager<ApplicationUser> userManager,
     private readonly IEmailSender emailSender = emailSender;
     private readonly IHttpContextAccessor httpContextAccessor = httpContextAccessor;
 
-    private readonly int tokenExpiryDayes = 14; // ممكن تجيبه من الإعدادات بدل ما يكون ثابت
-
-
+    private readonly int tokenExpiryDayes = 14;
 
     public async Task<Result<AuthResponse>> GetTokenAsync(
      string email,
@@ -124,10 +123,11 @@ public class AuthService(UserManager<ApplicationUser> userManager,
             { "{{Year}}", DateTime.UtcNow.Year.ToString() }
             });
 
-        await emailSender.SendEmailAsync(
-            user.Email,
+        // 👈 استخدام Hangfire مباشرة هنا لرسال الإيميل في الخلفية
+        BackgroundJob.Enqueue(() => emailSender.SendEmailAsync(
+            user.Email!,
             "Confirm your email",
-            emailBody);
+            emailBody));
 
         return Result.Success();
     }
@@ -164,6 +164,7 @@ public class AuthService(UserManager<ApplicationUser> userManager,
 
         return Result.Success();
     }
+
     public async Task<Result> ResendConfirmationEmailAsync(
     ResendConfirmationEmailReqest resendConfirmation,
     CancellationToken cancellationToken)
@@ -210,10 +211,11 @@ public class AuthService(UserManager<ApplicationUser> userManager,
             {"{{Year}}", DateTime.UtcNow.Year.ToString() }
             });
 
-        await emailSender.SendEmailAsync(
-            user.Email,
+        // 👈 استخدام Hangfire مباشرة هنا لرسال الإيميل في الخلفية
+        BackgroundJob.Enqueue(() => emailSender.SendEmailAsync(
+            user.Email!,
             "Confirm your email",
-            emailBody);
+            emailBody));
 
         return Result.Success();
     }
@@ -295,10 +297,9 @@ public class AuthService(UserManager<ApplicationUser> userManager,
 
         return Result.Success();
     }
+
     private static string GenerateRefreshToken()
     {
         return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
     }
-
-    
 }

@@ -18,4 +18,6 @@ public interface IPaymentRepository
     Task<Payment?> GetByBookingIdAsync(int bookingId);
     // ================== CHECK IF EXISTS ==================
     Task<bool> ExistsByBookingIdAsync(int bookingId);
+
+    Task<IEnumerable<Payment>> GetPaymentsOlderThanAsync(DateTime date);
 }

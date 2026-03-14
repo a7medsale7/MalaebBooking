@@ -42,4 +42,13 @@ public interface IBookingRepository
 
     // Optional: check if a time slot is already booked
     Task<bool> IsTimeSlotBookedAsync(int stadiumId, DateOnly date, TimeOnly startTime, TimeOnly endTime);
+
+
+
+
+    // ===== الميثودات التحليلية =====
+    Task<IEnumerable<Booking>> GetConfirmedBookingsInPastAsync();
+    Task<IEnumerable<Booking>> GetExpiredPendingBookingsAsync();
+    // بتجيب الحجوزات اللي ميعادها كمان x من الوقت
+    Task<IEnumerable<Booking>> GetUpcomingBookingsAsync(TimeSpan timeAhead);
 }
