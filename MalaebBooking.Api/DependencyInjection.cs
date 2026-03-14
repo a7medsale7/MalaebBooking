@@ -70,6 +70,7 @@ public static class DependencyInjection
         services.AddScoped<IStadiumImageRepository, StadiumImageRepository>();
         services.AddScoped<ITimeSlotRepository ,  TimeSlotRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
+        services.AddScoped<IReviewRepository, ReviewRepository>();
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
@@ -93,6 +94,7 @@ public static class DependencyInjection
         services.AddScoped<IStadiumService, StadiumService>();
         services.AddScoped<ITimeSlotService, TimeSlotService>();
         services.AddScoped<IBookingService,BookingService>();
+        services.AddScoped<IReviewService, ReviewService>();
 
         return services;
     }

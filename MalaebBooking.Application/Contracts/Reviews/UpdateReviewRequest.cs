@@ -5,10 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace MalaebBooking.Application.Contracts.Reviews;
-public class CreateReviewRequest
+public class UpdateReviewRequest
 {
-    public int StadiumId { get; set; }
     public int Rating { get; set; }
-
     public string? Comment { get; set; }
 }

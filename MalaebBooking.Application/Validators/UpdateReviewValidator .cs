@@ -1,20 +1,12 @@
 ﻿using FluentValidation;
 using MalaebBooking.Application.Contracts.Reviews;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MalaebBooking.Application.Validators;
-internal class CreateReviewValidator : AbstractValidator<CreateReviewRequest>
-{
-    public CreateReviewValidator()
-    {
-        RuleFor(x => x.StadiumId)
-            .GreaterThan(0)
-            .WithMessage("StadiumId must be greater than 0.");
 
+public class UpdateReviewValidator : AbstractValidator<UpdateReviewRequest>
+{
+    public UpdateReviewValidator()
+    {
         RuleFor(x => x.Rating)
             .InclusiveBetween(1, 5)
             .WithMessage("Rating must be between 1 and 5.");
