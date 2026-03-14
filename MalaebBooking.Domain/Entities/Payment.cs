@@ -16,7 +16,7 @@ public class Payment : Auditable
     public string PaymentScreenshotUrl { get; set; } = string.Empty;
 
     // رقم التليفون اللي حول منه الفلوس (عشان يسهل المراجعة لصاحب الملعب)
-    public string PlayerPhoneNumber { get; set; } = string.Empty;
+    public string? PlayerPhoneNumber { get; set; } = string.Empty;
 
     public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
 

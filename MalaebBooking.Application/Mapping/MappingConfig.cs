@@ -13,6 +13,12 @@ public class MappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
+        // إعدادات الـ Mapping للـ TimeSlotResponse عشان نحسب السعر
+        config.NewConfig<TimeSlot, MalaebBooking.Application.Contracts.TimeSlots.TimeSlotResponse>()
+            .Map(dest => dest.Price, src => src.Stadium != null 
+                ? (decimal)(src.EndTime - src.StartTime).TotalHours * src.Stadium.PricePerHour 
+                : 0);
+
         // إعدادات الـ Mapping للـ BookingDetailsResponse
         config.NewConfig<Booking, BookingDetailsResponse>()
             // سحب بيانات الملعب والوقت من الـ TimeSlot المرتبط بالحجز

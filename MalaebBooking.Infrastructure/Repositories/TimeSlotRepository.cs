@@ -36,6 +36,7 @@ public class TimeSlotRepository : ITimeSlotRepository
     public async Task<IEnumerable<TimeSlot>> GetAllByStadiumIdAsync(int stadiumId)
     {
         return await _context.TimeSlots
+            .Include(x => x.Stadium)
             .AsNoTracking()
             .Where(x => x.StadiumId == stadiumId)
             .ToListAsync();
@@ -44,6 +45,7 @@ public class TimeSlotRepository : ITimeSlotRepository
     public async Task<IEnumerable<TimeSlot>> GetByStadiumAndDateAsync(int stadiumId, DateOnly date)
     {
         return await _context.TimeSlots
+            .Include(x => x.Stadium)
             .AsNoTracking()
             .Where(x => x.StadiumId == stadiumId && x.Date == date)
             .ToListAsync();
@@ -52,6 +54,7 @@ public class TimeSlotRepository : ITimeSlotRepository
     public async Task<IEnumerable<TimeSlot>> GetAvailableByStadiumAndDateAsync(int stadiumId, DateOnly date)
     {
         return await _context.TimeSlots
+            .Include(x => x.Stadium)
             .AsNoTracking()
             .Where(x =>
                 x.StadiumId == stadiumId &&
@@ -63,6 +66,7 @@ public class TimeSlotRepository : ITimeSlotRepository
     public async Task<TimeSlot?> GetByIdAsync(int id)
     {
         return await _context.TimeSlots
+            .Include(x => x.Stadium)
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 

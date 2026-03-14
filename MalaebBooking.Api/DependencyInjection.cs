@@ -71,6 +71,7 @@ public static class DependencyInjection
         services.AddScoped<ITimeSlotRepository ,  TimeSlotRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IReviewRepository, ReviewRepository>();
+        services.AddScoped<IPaymentRepository, PaymentRepository>();
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
@@ -95,6 +96,7 @@ public static class DependencyInjection
         services.AddScoped<ITimeSlotService, TimeSlotService>();
         services.AddScoped<IBookingService,BookingService>();
         services.AddScoped<IReviewService, ReviewService>();
+        services.AddScoped<IPaymentService, PaymentService>();
 
         return services;
     }

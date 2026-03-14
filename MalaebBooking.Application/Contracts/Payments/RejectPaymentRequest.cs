@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace MalaebBooking.Application.Contracts.Payments;
-internal class ConfirmPaymentRequest
+public class RejectPaymentRequest
 {
+    public string? RejectionReason { get; set; }     // سبب الرفض
 }

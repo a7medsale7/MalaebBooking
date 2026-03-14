@@ -30,9 +30,9 @@ public class BookingRepository : IBookingRepository
     public async Task<Booking?> GetByIdAsync(int id)
     {
         return await _context.Bookings
-            .Include(x => x.TimeSlot)
             .Include(x => x.Player)
-            .Include(x => x.TimeSlot) // يفضل جلب تفاصيل التايم سلوت دايماً مع الحجز
+            .Include(x => x.TimeSlot)
+                .ThenInclude(t => t.Stadium)
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 

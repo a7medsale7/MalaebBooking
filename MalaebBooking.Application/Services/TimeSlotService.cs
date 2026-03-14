@@ -10,10 +10,12 @@ namespace MalaebBooking.Application.Services;
 public class TimeSlotService : ITimeSlotService
 {
     private readonly ITimeSlotRepository _timeSlotRepository;
+    private readonly IStadiumRepository _stadiumRepository;
 
-    public TimeSlotService(ITimeSlotRepository timeSlotRepository)
+    public TimeSlotService(ITimeSlotRepository timeSlotRepository, IStadiumRepository stadiumRepository)
     {
         _timeSlotRepository = timeSlotRepository;
+        _stadiumRepository = stadiumRepository;
     }
 
     public async Task<Result<TimeSlotResponse>> CreateTimeSlotAsync(CreateTimeSlotRequest request)
@@ -35,10 +37,17 @@ public class TimeSlotService : ITimeSlotService
 
         if (hasConflict)
             return Result.Failure<TimeSlotResponse>(TimeSlotErrors.Overlapping);
-
         await _timeSlotRepository.AddAsync(timeSlot);
 
+        // Fetch the Stadium to calculate the price for the response
+        var stadium = await _stadiumRepository.GetByIdAsync(timeSlot.StadiumId);
+        
         var response = timeSlot.Adapt<TimeSlotResponse>();
+        
+        if (stadium != null)
+        {
+            response.Price = (decimal)(timeSlot.EndTime - timeSlot.StartTime).TotalHours * stadium.PricePerHour;
+        }
 
         return Result.Success(response);
     }
