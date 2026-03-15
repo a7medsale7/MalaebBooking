@@ -108,6 +108,11 @@ public class AuthService(UserManager<ApplicationUser> userManager,
         emailToken = WebEncoders.Base64UrlEncode(
             Encoding.UTF8.GetBytes(emailToken));
 
+        logger.LogInformation(
+            "Email confirmation token for user {Email}: {Token}",
+            user.Email,
+            emailToken);
+
         var origin = httpContextAccessor.HttpContext?.Request.Headers["Origin"].FirstOrDefault()
                      ?? "https://yourfrontend.com";
 
