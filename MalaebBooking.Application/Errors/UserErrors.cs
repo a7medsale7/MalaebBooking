@@ -30,4 +30,12 @@ public static class UserErrors
 
     public static readonly Error EmailConfirmationFailed =
         new("User.EmailConfirmationFailed", "Email confirmation failed.");
+
+
+  
+    public static readonly Error InvalidPassword =
+        new("User.InvalidPassword", "كلمة المرور الحالية غير صحيحة");
+    public static readonly Error PasswordChangeFailed =
+        new("User.PasswordChangeFailed", "حدث خطأ أثناء تغيير كلمة المرور");
+    
 }

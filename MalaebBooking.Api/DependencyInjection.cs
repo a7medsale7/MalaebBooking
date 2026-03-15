@@ -95,7 +95,7 @@ public static class DependencyInjection
         services.AddScoped<IBookingService, BookingService>();
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<IPaymentService, PaymentService>();
-
+        services.AddScoped<IUserService , UserService>();
         // 👈 إضافة المهام المجدولة للـ Dependency Injection
         services.AddScoped<BookingBackgroundJobs>();
 
