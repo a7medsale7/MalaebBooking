@@ -1,7 +1,8 @@
-﻿using MalaebBooking.Application.Contracts.Users;
+﻿// 8. UsersController.cs
+using MalaebBooking.Application.Contracts.Users;
 using MalaebBooking.Application.Services;
+using MalaebBooking.Domain.Consts;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -9,69 +10,56 @@ namespace MalaebBooking.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UsersController : ControllerBase
+public class UsersController(IUserService userService) : ControllerBase
 {
-    private readonly IUserService _userService;
+    private readonly IUserService _userService = userService;
 
-    public UsersController(IUserService userService)
-    {
-        _userService = userService;
-    }
-
-    // 1. عرض بيانات البروفايل (لازم يكون عامل لوجين)
     [HttpGet("profile")]
-    [Authorize]
+    [Authorize(Policy = Permissions.Users_ViewProfile)]
     public async Task<IActionResult> GetProfile()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId is null)
-            return Unauthorized();
-
+        if (userId is null) return Unauthorized();
         var result = await _userService.GetProfileAsync(userId);
         return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
     }
 
-    // 2. تحديث بيانات البروفايل (لازم يكون عامل لوجين)
     [HttpPut("profile")]
-    [Authorize]
+    [Authorize(Policy = Permissions.Users_UpdateProfile)]
     public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId is null)
-            return Unauthorized();
-
+        if (userId is null) return Unauthorized();
         var result = await _userService.UpdateProfileAsync(userId, request);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
-    // 3. تغيير الباسورد القديم بواحد جديد (لازم يكون عامل لوجين)
     [HttpPut("change-password")]
-    [Authorize]
+    [Authorize(Policy = Permissions.Users_ChangePassword)]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId is null)
-            return Unauthorized();
-
+        if (userId is null) return Unauthorized();
         var result = await _userService.ChangePasswordAsync(userId, request);
         return result.IsSuccess ? Ok() : BadRequest(result.Error);
     }
 
-    // 4. طلب استعادة الباسورد (بياخد الإيميل ويبعتله رابط الـ Reset في الخلفية)
+    [HttpGet("all")]
+    [Authorize(Roles = DefaultRoles.Admin, Policy = Permissions.Users_ViewAll)]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        return Ok("Admin logic to get all users");
+    }
+
     [HttpPost("forgot-password")]
     [AllowAnonymous]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
     {
-        // بنجيب أصل الرابط عشان نبعته لليوزر يدوس عليه (زي http://localhost:1234)
         var originUrl = $"{Request.Scheme}://{Request.Host.Value}";
-
-        var result = await _userService.ForgotPasswordAsync(request, originUrl);
-
-        // ديماً نرجع 200 OK عشان الهاكر ميعرفش مين مسجل في السيستم ومين مش مسجل
+        await _userService.ForgotPasswordAsync(request, originUrl);
         return Ok(new { message = "إذا كان بريدك الإلكتروني مسجلاً لدينا، ستصلك رسالة تحتوي على رابط لاستعادة كلمة المرور." });
     }
 
-    // 5. استعادة الباسورد باستخدام الـ Token اللي في الرابط
     [HttpPost("reset-password")]
     [AllowAnonymous]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)

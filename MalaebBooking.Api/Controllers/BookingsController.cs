@@ -1,6 +1,7 @@
-﻿using MalaebBooking.Application.Contracts.Bookings;
+﻿// 1. BookingsController.cs
+using MalaebBooking.Application.Contracts.Bookings;
 using MalaebBooking.Application.Services;
-using MalaebBooking.Domain.Enums;
+using MalaebBooking.Domain.Consts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -9,152 +10,90 @@ namespace MalaebBooking.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize] // كل الحجوزات تتطلب تسجيل دخول
-public class BookingsController : ControllerBase
+[Authorize]
+public class BookingsController(IBookingService bookingService) : ControllerBase
 {
-    private readonly IBookingService _bookingService;
+    private readonly IBookingService _bookingService = bookingService;
 
-    public BookingsController(IBookingService bookingService)
-    {
-        _bookingService = bookingService;
-    }
-
-    // ==================== Create ====================
     [HttpPost]
+    [Authorize(Policy = Permissions.Bookings_Create)]
     public async Task<IActionResult> Create([FromBody] CreateBookingRequest request)
     {
-        // سحب الـ User ID من التوكن الحالي
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId))
-            return Unauthorized();
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
         var result = await _bookingService.CreateBookingAsync(request, userId);
-
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-
-        return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
+        return result.IsFailure ? BadRequest(result.Error) : CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
     }
 
-    // ==================== Read ====================
     [HttpGet("{id}")]
+    [Authorize(Policy = Permissions.Bookings_View)]
     public async Task<IActionResult> GetById(int id)
     {
         var result = await _bookingService.GetBookingByIdAsync(id);
-
-        if (result.IsFailure)
-        {
-            if (result.Error.Code == "Booking.NotFound")
-                return NotFound(result.Error);
-
-            return BadRequest(result.Error);
-        }
-
+        if (result.IsFailure) return result.Error.Code == "Booking.NotFound" ? NotFound(result.Error) : BadRequest(result.Error);
         return Ok(result.Value);
     }
 
-    // استعراض حجوزات المستخدم الحالي بناءً على التوكن
     [HttpGet("my-bookings")]
+    [Authorize(Policy = Permissions.Bookings_View)]
     public async Task<IActionResult> GetMyBookings()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId))
-            return Unauthorized();
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
         var result = await _bookingService.GetBookingsByUserAsync(userId);
-
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-
-        return Ok(result.Value);
+        return result.IsFailure ? BadRequest(result.Error) : Ok(result.Value);
     }
 
-    // استعراض حجوزات لملعب معين (مهمة للمالك/الأدمن)
     [HttpGet("stadium/{stadiumId}")]
-    // [Authorize(Roles = "StadiumOwner, Admin")] // ممكن تفعلها مستقبلاً
+    [Authorize(Roles = $"{DefaultRoles.Admin},{DefaultRoles.Owner}", Policy = Permissions.Bookings_View)]
     public async Task<IActionResult> GetBookingsByStadium(int stadiumId)
     {
         var result = await _bookingService.GetBookingsByStadiumAsync(stadiumId);
-
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-
-        return Ok(result.Value);
+        return result.IsFailure ? BadRequest(result.Error) : Ok(result.Value);
     }
 
-    // مفيدة للـ Dashboard
     [HttpGet]
-    // [Authorize(Roles = "Admin")]
+    [Authorize(Roles = DefaultRoles.Admin, Policy = Permissions.Bookings_View)]
     public async Task<IActionResult> GetAll()
     {
         var result = await _bookingService.GetAllBookingsAsync();
-
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-
-        return Ok(result.Value);
+        return result.IsFailure ? BadRequest(result.Error) : Ok(result.Value);
     }
 
-    // ==================== Update & Cancel ====================
     [HttpPut("{id}/status")]
-    // [Authorize(Roles = "StadiumOwner, Admin")] // تغيير الحالة بيبقى للملعب أو الإدارة غالطاً
+    [Authorize(Roles = $"{DefaultRoles.Admin},{DefaultRoles.Owner}", Policy = Permissions.Bookings_UpdateStatus)]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateBookingRequest request)
     {
         var result = await _bookingService.UpdateBookingStatusAsync(id, request);
-
-        if (result.IsFailure)
-        {
-            if (result.Error.Code == "Booking.NotFound")
-                return NotFound(result.Error);
-
-            return BadRequest(result.Error);
-        }
-
+        if (result.IsFailure) return result.Error.Code == "Booking.NotFound" ? NotFound(result.Error) : BadRequest(result.Error);
         return Ok(result.Value);
     }
 
     [HttpPost("{id}/cancel")]
+    [Authorize(Policy = Permissions.Bookings_Cancel)]
     public async Task<IActionResult> CancelBooking(int id, [FromBody] string cancellationReason)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId))
-            return Unauthorized();
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
         var result = await _bookingService.CancelBookingAsync(id, cancellationReason, userId);
-
         if (result.IsFailure)
         {
-            if (result.Error.Code == "Booking.NotFound")
-                return NotFound(result.Error);
-
-            if (result.Error.Code == "Booking.Unauthorized")
-            {
-                // ده بيرجع 403 (Forbidden) وجواه رسالة الخطأ زي ما هي متسجلة
-                return StatusCode(StatusCodes.Status403Forbidden, result.Error);
-            }
-
-
+            if (result.Error.Code == "Booking.NotFound") return NotFound(result.Error);
+            if (result.Error.Code == "Booking.Unauthorized") return StatusCode(StatusCodes.Status403Forbidden, result.Error);
             return BadRequest(result.Error);
         }
-
         return Ok(new { Message = "تم إلغاء الحجز بنجاح." });
     }
 
-    // ==================== Delete ====================
     [HttpDelete("{id}")]
-    // [Authorize(Roles = "Admin")] // يستحسن الحذف النهائي يكون من صلاحيات الأدمن بس
+    [Authorize(Roles = DefaultRoles.Admin, Policy = Permissions.Bookings_Delete)]
     public async Task<IActionResult> Delete(int id)
     {
         var result = await _bookingService.DeleteBookingAsync(id);
-
-        if (result.IsFailure)
-        {
-            if (result.Error.Code == "Booking.NotFound")
-                return NotFound(result.Error);
-
-            return BadRequest(result.Error);
-        }
-
+        if (result.IsFailure) return result.Error.Code == "Booking.NotFound" ? NotFound(result.Error) : BadRequest(result.Error);
         return NoContent();
     }
 }

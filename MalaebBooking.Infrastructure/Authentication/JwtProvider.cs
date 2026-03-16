@@ -1,9 +1,11 @@
-﻿using MalaebBooking.Domain.Entities;
+﻿using MalaebBooking.Domain.Consts;
+using MalaebBooking.Domain.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 namespace MalaebBooking.Infrastructure.Authentication;
 
@@ -11,7 +13,7 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 {
     private readonly JwtOptions options = options.Value;
 
-    public (string Token, DateTime Expiration) GenerateToken(ApplicationUser user)
+    public (string Token, DateTime Expiration) GenerateToken(ApplicationUser user , IEnumerable<string> roles ,IEnumerable<string> permissions )
     {
         var key = options.Key;
         var issuer = options.Issuer;
@@ -20,14 +22,24 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 
         var expiration = DateTime.UtcNow.AddMinutes(expiryMinutes);
 
-        Claim[] claims =
-        [
+        var claims = new List<Claim>
+        {
             new(JwtRegisteredClaimNames.Sub, user.Id),
             new(JwtRegisteredClaimNames.Email, user.Email!),
             new(JwtRegisteredClaimNames.GivenName, user.FirstName),
             new(JwtRegisteredClaimNames.FamilyName, user.LastName),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        ];
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        };
+
+        // إضافة الرولز بشكل منفصل (Standard ASP.NET Core Roles)
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+        // إضافة البرمشنز بشكل منفصل (Custom Permission Policy)
+        claims.AddRange(permissions.Select(permission => new Claim(Permissions.Type, permission)));
+
+        // اختياري: إضافة الرولز والبرمشنز كـ Array لخدمة أي منطق في الـ Frontend لو محتاج
+        claims.Add(new Claim("roles", JsonSerializer.Serialize(roles), JsonClaimValueTypes.JsonArray));
+        claims.Add(new Claim("permissions", JsonSerializer.Serialize(permissions), JsonClaimValueTypes.JsonArray));
 
         var symmetricSecurityKey =
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Key));

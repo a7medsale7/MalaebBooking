@@ -20,7 +20,7 @@ public static class InfrastructureDependencyInjection
             options.UseSqlServer(connectionString));
 
         // 2️⃣ إعداد Identity
-        services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+        services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
         {
             // إعدادات الباسورد
             options.Password.RequireDigit = true;

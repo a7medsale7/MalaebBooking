@@ -4,6 +4,7 @@ using MalaebBooking.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MalaebBooking.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260315213454_UpdateRolesTable")]
+    partial class UpdateRolesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,35 +56,6 @@ namespace MalaebBooking.Infrastructure.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297",
-                            ConcurrencyStamp = "d1c8e5b9-9f0a-4c3e-8a1b-2f5e6d7c8a9b",
-                            IsDefault = false,
-                            IsDeleted = false,
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
-                        },
-                        new
-                        {
-                            Id = "b9a61ca4-01bb-4a4f-8ccc-ca5dd59b42f9",
-                            ConcurrencyStamp = "f3a7b8c9-0d2e-4f5a-9b3c-4d6e7f8a9b1c",
-                            IsDefault = true,
-                            IsDeleted = false,
-                            Name = "Player",
-                            NormalizedName = "PLAYER"
-                        },
-                        new
-                        {
-                            Id = "5ab3a4d8-f2ee-48df-b897-a69fa5ef88d4",
-                            ConcurrencyStamp = "e2f9c6a7-8b1d-4c3e-9a2b-3f6d7c8a9b0c",
-                            IsDefault = false,
-                            IsDeleted = false,
-                            Name = "Owner",
-                            NormalizedName = "OWNER"
-                        });
                 });
 
             modelBuilder.Entity("MalaebBooking.Domain.Entities.ApplicationUser", b =>
@@ -160,27 +134,6 @@ namespace MalaebBooking.Infrastructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "877a5585-4894-4f4b-8989-f45476063ce1",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "a25eba83-ab00-408b-8dfa-ce8a1cf37bea",
-                            Email = "Admin@Malaeb-Booking.com",
-                            EmailConfirmed = true,
-                            FirstName = "Malaeb",
-                            IsDisabled = false,
-                            LastName = "Admin",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "ADMIN@MALAEB-BOOKING.COM",
-                            NormalizedUserName = "ADMIN@MALAEB-BOOKING.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEBu6H7C9iF9Tq3twVRr0uJaFzrtfpWgkhEKBHa0jsAD+KuMRutaglQhMbnbICcDKyQ==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "CFFCC4EEB0EE4D608E7CEFFE61FFDBD2",
-                            TwoFactorEnabled = false,
-                            UserName = "Admin@Malaeb-Booking.com"
-                        });
                 });
 
             modelBuilder.Entity("MalaebBooking.Domain.Entities.Booking", b =>
@@ -549,267 +502,6 @@ namespace MalaebBooking.Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetRoleClaims", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Users.ViewProfile",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Users.UpdateProfile",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Users.ChangePassword",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Users.ViewAll",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Users.ManageRoles",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Stadiums.View",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Stadiums.Create",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Stadiums.Update",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Stadiums.ToggleActive",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Stadiums.Delete",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.StadiumImages.View",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.StadiumImages.Upload",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.StadiumImages.Update",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.StadiumImages.Delete",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 16,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.TimeSlots.View",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 17,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.TimeSlots.Create",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 18,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.TimeSlots.Update",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 19,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.TimeSlots.Delete",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.SportTypes.View",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 21,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.SportTypes.Create",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 22,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.SportTypes.Update",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 23,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.SportTypes.Delete",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 24,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.SportTypes.UploadIcon",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 25,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Bookings.View",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 26,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Bookings.Create",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 27,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Bookings.UpdateStatus",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 28,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Bookings.Cancel",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 29,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Bookings.Delete",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 30,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Payments.View",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 31,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Payments.SubmitProof",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 32,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Payments.Approve",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 33,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Payments.Reject",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 34,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Reviews.View",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 35,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Reviews.Create",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 36,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Reviews.Update",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        },
-                        new
-                        {
-                            Id = 37,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions.Reviews.Delete",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -872,13 +564,6 @@ namespace MalaebBooking.Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = "877a5585-4894-4f4b-8989-f45476063ce1",
-                            RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>

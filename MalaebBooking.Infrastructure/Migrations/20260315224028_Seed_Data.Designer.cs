@@ -4,6 +4,7 @@ using MalaebBooking.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MalaebBooking.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260315224028_Seed_Data")]
+    partial class Seed_Data
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -554,259 +557,259 @@ namespace MalaebBooking.Infrastructure.Migrations
                         new
                         {
                             Id = 1,
-                            ClaimType = "Permissions",
-                            ClaimValue = "Permissions",
+                            ClaimType = "Permission",
+                            ClaimValue = "Permission",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 2,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Users.ViewProfile",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 3,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Users.UpdateProfile",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 4,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Users.ChangePassword",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 5,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Users.ViewAll",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 6,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Users.ManageRoles",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 7,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Stadiums.View",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 8,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Stadiums.Create",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 9,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Stadiums.Update",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 10,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Stadiums.ToggleActive",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 11,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Stadiums.Delete",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 12,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.StadiumImages.View",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 13,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.StadiumImages.Upload",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 14,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.StadiumImages.Update",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 15,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.StadiumImages.Delete",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 16,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.TimeSlots.View",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 17,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.TimeSlots.Create",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 18,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.TimeSlots.Update",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 19,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.TimeSlots.Delete",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 20,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.SportTypes.View",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 21,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.SportTypes.Create",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 22,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.SportTypes.Update",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 23,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.SportTypes.Delete",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 24,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.SportTypes.UploadIcon",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 25,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Bookings.View",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 26,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Bookings.Create",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 27,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Bookings.UpdateStatus",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 28,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Bookings.Cancel",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 29,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Bookings.Delete",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 30,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Payments.View",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 31,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Payments.SubmitProof",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 32,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Payments.Approve",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 33,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Payments.Reject",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 34,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Reviews.View",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 35,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Reviews.Create",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 36,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Reviews.Update",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         },
                         new
                         {
                             Id = 37,
-                            ClaimType = "Permissions",
+                            ClaimType = "Permission",
                             ClaimValue = "Permissions.Reviews.Delete",
                             RoleId = "3a6ce7a1-2b66-48dd-ba28-3cf7080a3297"
                         });

@@ -8,12 +8,15 @@ using MalaebBooking.Domain.Abstractions.Repositories;
 using MalaebBooking.Domain.Entities;
 using MalaebBooking.Infrastructure;
 using MalaebBooking.Infrastructure.Authentication;
+using MalaebBooking.Infrastructure.Authentication.Filters;
 using MalaebBooking.Infrastructure.Mail;
 using MalaebBooking.Infrastructure.Persistence;
 using MalaebBooking.Infrastructure.Repositories;
 using Mapster;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
@@ -162,6 +165,12 @@ public static class DependencyInjection
             .Bind(configuration.GetSection(JwtOptions.SectionName))
             .ValidateDataAnnotations()
             .ValidateOnStart();
+
+        services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddTransient<IAuthorizationPolicyProvider, PermissionAuotherzationPolicyProvider >();
+
+
+
 
         var settings = configuration
             .GetSection(JwtOptions.SectionName)

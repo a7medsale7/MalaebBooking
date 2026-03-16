@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace MalaebBooking.Infrastructure.Persistence;
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser , ApplicationRole, string>
 {
     private readonly IHttpContextAccessor httpContextAccessor;
 

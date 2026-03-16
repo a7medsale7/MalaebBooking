@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace MalaebBooking.Infrastructure.Authentication;
 public interface IJwtProvider
 {
-    (string Token, DateTime Expiration) GenerateToken(ApplicationUser user);
+    (string Token, DateTime Expiration) GenerateToken(ApplicationUser user, IEnumerable<string> roles, IEnumerable<string> permissions);
 
     string? ValidateToken(string token);    
 

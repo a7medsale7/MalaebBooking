@@ -2,9 +2,11 @@
 using MalaebBooking.Application.Abstractions.Result;
 using MalaebBooking.Application.Contracts.Auth;
 using MalaebBooking.Application.Errors;
+using MalaebBooking.Domain.Consts;
 using MalaebBooking.Domain.Entities;
 using MalaebBooking.Infrastructure.Authentication;
 using MalaebBooking.Infrastructure.Helper;
+using MalaebBooking.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -21,7 +23,8 @@ public class AuthService(UserManager<ApplicationUser> userManager,
     IJwtProvider jwtProvider,
     ILogger<AuthService> logger,
     IEmailSender emailSender,
-    IHttpContextAccessor httpContextAccessor) : IAuthService
+    IHttpContextAccessor httpContextAccessor,
+    ApplicationDbContext applicationDbContext) : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly SignInManager<ApplicationUser> signInManager = signInManager;
@@ -29,7 +32,7 @@ public class AuthService(UserManager<ApplicationUser> userManager,
     private readonly ILogger<AuthService> logger = logger;
     private readonly IEmailSender emailSender = emailSender;
     private readonly IHttpContextAccessor httpContextAccessor = httpContextAccessor;
-
+    private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
     private readonly int tokenExpiryDayes = 14;
 
     public async Task<Result<AuthResponse>> GetTokenAsync(
@@ -50,7 +53,23 @@ public class AuthService(UserManager<ApplicationUser> userManager,
         if (!result.Succeeded)
             return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
-        var (token, expiration) = jwtProvider.GenerateToken(user);
+
+        var userroles = await _userManager.GetRolesAsync(user);
+        var userpermissions = await applicationDbContext.Roles
+            .Join(applicationDbContext.RoleClaims,
+                role => role.Id,
+                claim => claim.RoleId,
+                (role, claim) => new {role,claim}     
+                )
+            .Where(rc => userroles.Contains(rc.role.Name!))
+            .Select(rc => rc.claim.ClaimValue!)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+
+
+
+        var (token, expiration) = jwtProvider.GenerateToken(user , userroles , userpermissions );
 
         var refreshToken = GenerateRefreshToken();
         var refreshTokenExpiry = DateTime.UtcNow.AddDays(tokenExpiryDayes);
@@ -167,6 +186,8 @@ public class AuthService(UserManager<ApplicationUser> userManager,
         if (!result.Succeeded)
             return Result.Failure(UserErrors.EmailConfirmationFailed);
 
+        await _userManager.AddToRoleAsync(user, DefaultRoles.Player);
+
         return Result.Success();
     }
 
@@ -248,7 +269,19 @@ public class AuthService(UserManager<ApplicationUser> userManager,
 
         userRefreshToken.RevokedOn = DateTime.UtcNow;
 
-        var (newToken, expiration) = jwtProvider.GenerateToken(user);
+        var userroles = await _userManager.GetRolesAsync(user);
+        var userpermissions = await applicationDbContext.Roles
+            .Join(applicationDbContext.RoleClaims,
+                role => role.Id,
+                claim => claim.RoleId,
+                (role, claim) => new { role, claim }
+                )
+            .Where(rc => userroles.Contains(rc.role.Name!))
+            .Select(rc => rc.claim.ClaimValue!)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        var (newToken, expiration) = jwtProvider.GenerateToken(user , userroles , userpermissions);
 
         var newRefreshToken = GenerateRefreshToken();
         var refreshTokenExpiry = DateTime.UtcNow.AddDays(tokenExpiryDayes);

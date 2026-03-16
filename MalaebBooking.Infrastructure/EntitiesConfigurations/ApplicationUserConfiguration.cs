@@ -1,4 +1,6 @@
-﻿using MalaebBooking.Domain.Entities;
+﻿using MalaebBooking.Domain.Consts;
+using MalaebBooking.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -20,6 +22,22 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
             t.ToTable("RefreshTokens");
             t.Property(r => r.Token).HasMaxLength(200).IsRequired();
             t.WithOwner().HasForeignKey("UserId"); // ربط التوكن باليوزر
+        });
+        //default admin user seeding
+
+        builder.HasData(new ApplicationUser
+        {
+            Id = DefaultUsers.AdminId,
+            FirstName = "Malaeb",
+            LastName = "Admin",
+            Email = DefaultUsers.AdminEmail,
+            NormalizedEmail = DefaultUsers.AdminEmail.ToUpper(),
+            UserName = DefaultUsers.AdminEmail,
+            NormalizedUserName = DefaultUsers.AdminEmail.ToUpper(),
+            SecurityStamp = DefaultUsers.AdminSecurityStamp,
+            ConcurrencyStamp = DefaultUsers.AdminConcurrencyStamp,
+            EmailConfirmed = true,
+            PasswordHash = DefaultUsers.AdminPasswordHash,
         });
     }
 }
