@@ -61,6 +61,13 @@ public static class Permissions
     public const string Reviews_Update = "Permissions.Reviews.Update";
     public const string Reviews_Delete = "Permissions.Reviews.Delete";
 
+    public const string Roles_View = "Permissions.Roles.View";
+    public const string Roles_Create = "Permissions.Roles.Create";
+    public const string Roles_Update = "Permissions.Roles.Update";
+    public const string Roles_ToggleActive = "Permissions.Roles.ToggleActive";
+
+
+
     public static IList<string?> GetAllPermissions()=>
         typeof(Permissions).GetFields().Select(f => f.GetValue(f) as string).ToList();
 }

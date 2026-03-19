@@ -13,19 +13,67 @@ public class ApplicationRoleClaimConfigurations : IEntityTypeConfiguration<Ident
 {
     public void Configure(EntityTypeBuilder<IdentityRoleClaim<string>> builder)
     {
-       var permissions = Permissions.GetAllPermissions();
-        var adminClaims = new List<IdentityRoleClaim<string>>();
-        for (int i = 0; i < permissions.Count; i++)
+        var allPermissions = Permissions.GetAllPermissions();
+        var allClaims = new List<IdentityRoleClaim<string>>();
+        int claimId = 1;
+
+        // 1. Admin Permissions (All)
+        foreach (var permission in allPermissions)
         {
-            adminClaims.Add(new IdentityRoleClaim<string>
+            if (string.IsNullOrEmpty(permission)) continue;
+            allClaims.Add(new IdentityRoleClaim<string>
             {
-                Id = i + 1, // لازم يكون عندي Id فريد لكل Claim
+                Id = claimId++,
                 RoleId = DefaultRoles.AdminRoleId,
                 ClaimType = Permissions.Type,
-                ClaimValue = permissions[i] ?? string.Empty
+                ClaimValue = permission
             });
         }
-        builder.HasData(adminClaims);
 
+        // 2. Owner Permissions
+        var ownerPermissions = new List<string>
+        {
+            Permissions.Users_ViewProfile,
+            Permissions.Users_UpdateProfile,
+            Permissions.Users_ChangePassword,
+            
+            Permissions.Stadiums_View,
+            Permissions.Stadiums_Create,
+            Permissions.Stadiums_Update,
+            Permissions.Stadiums_ToggleActive,
+            
+            Permissions.StadiumImages_View,
+            Permissions.StadiumImages_Upload,
+            Permissions.StadiumImages_Update,
+            Permissions.StadiumImages_Delete,
+            
+            Permissions.TimeSlots_View,
+            Permissions.TimeSlots_Create,
+            Permissions.TimeSlots_Update,
+            Permissions.TimeSlots_Delete,
+            
+            Permissions.Bookings_View,
+            Permissions.Bookings_UpdateStatus,
+            Permissions.Bookings_Cancel,
+            
+            Permissions.Payments_View,
+            Permissions.Payments_Approve,
+            Permissions.Payments_Reject,
+            
+            Permissions.Reviews_View
+        };
+
+        foreach (var permission in ownerPermissions)
+        {
+            allClaims.Add(new IdentityRoleClaim<string>
+            {
+                Id = claimId++,
+                RoleId = DefaultRoles.OwnerRoleId,
+                ClaimType = Permissions.Type,
+                ClaimValue = permission
+            });
+        }
+
+        builder.HasData(allClaims);
     }
 }

@@ -43,7 +43,7 @@ public class StadiumService(IStadiumRepository stadiumRepository, UserManager<Ap
         stadium.OwnerId = currentUserId;
 
         await stadiumRepository.AddAsync(stadium, cancellationToken);
-        return Result.Success();
+        return Result.Success(stadium);
     }
 
     // ================== GET ACTIVE STADIUMS ==================

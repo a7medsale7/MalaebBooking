@@ -75,6 +75,7 @@ public static class DependencyInjection
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IReviewRepository, ReviewRepository>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
@@ -82,6 +83,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IEmailSender, EmailService>();
         services.AddScoped<IStadiumImageService, StadiumImageService>();
+
 
         return services;
     }
@@ -99,6 +101,7 @@ public static class DependencyInjection
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IUserService , UserService>();
+        services.AddScoped<IRoleService, RoleService>();
         // 👈 إضافة المهام المجدولة للـ Dependency Injection
         services.AddScoped<BookingBackgroundJobs>();
 

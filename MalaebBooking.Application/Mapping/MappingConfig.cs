@@ -1,4 +1,5 @@
 ﻿using MalaebBooking.Application.Contracts.Bookings;
+using MalaebBooking.Application.Contracts.Users;
 using MalaebBooking.Domain.Entities;
 using Mapster;
 using System;
@@ -33,5 +34,9 @@ public class MappingConfig : IRegister
 
         // باقي الخصائص المتطابقة في الاسمين (Id, Status, TotalPrice, etc.) 
         // الـ Mapster بينقلها لوحده تلقائي ومش محتاجين نكتبلها Map.
+        config.NewConfig<(ApplicationUser user, IList<string> roles), UserResponse>()
+     .Map(dest => dest, src => src.user) // Copy all properties from ApplicationUser
+     .Map(dest => dest.Roles, src => src.roles);
+
     }
 }
