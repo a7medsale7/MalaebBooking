@@ -54,23 +54,20 @@ namespace MalaebBooking.Infrastructure.Mail
 
                 logger.LogInformation("Attempting to send email to {Email} via {Host}:{Port}", email, mailSettings.Host, mailSettings.Port);
 
-                // Connect to SMTP server
+                // Use settings from Configuration (appsettings.json)
                 await smtp.ConnectAsync(
                     mailSettings.Host,
                     mailSettings.Port,
                     SecureSocketOptions.SslOnConnect
                 );
 
-                // Authenticate
                 await smtp.AuthenticateAsync(
                     mailSettings.Mail,
                     mailSettings.Password
                 );
 
-                // Send email
                 await smtp.SendAsync(message);
 
-                // Disconnect
                 await smtp.DisconnectAsync(true);
 
                 logger.LogInformation("Email sent successfully to {Email}", email);

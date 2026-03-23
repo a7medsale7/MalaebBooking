@@ -14,7 +14,8 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
         {
             Status = StatusCodes.Status500InternalServerError,
             Title = "Internal Server Error",
-            Type = exception.GetType().Name
+            Type = exception.GetType().Name,
+            Detail = exception.Message
         };
         httpContext.Response.StatusCode= StatusCodes.Status500InternalServerError;
         await httpContext.Response.WriteAsJsonAsync(problemDetails).ConfigureAwait(false);
