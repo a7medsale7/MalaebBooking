@@ -1,4 +1,4 @@
-﻿using Hangfire; // 👈 إضافة Hangfire
+using Hangfire; // 👈 إضافة Hangfire
 using MalaebBooking.Application.Abstractions.Result;
 using MalaebBooking.Application.Contracts.Auth;
 using MalaebBooking.Application.Errors;
@@ -137,11 +137,11 @@ public class AuthService(UserManager<ApplicationUser> userManager,
             user.Email,
             emailToken);
 
-        var origin = httpContextAccessor.HttpContext?.Request.Headers["Origin"].FirstOrDefault()
-                     ?? "https://yourfrontend.com";
+        var request = httpContextAccessor.HttpContext?.Request;
+        var baseUrl = $"{request?.Scheme}://{request?.Host}";
 
         var confirmationLink =
-            $"{origin}/confirm-email?userId={user.Id}&code={emailToken}";
+            $"{baseUrl}/Auth/confirm-email?userId={user.Id}&code={emailToken}";
 
         var emailBody = EmailBodyBuilder.GenerateEmailBody(
             "EmailConfirmation",
@@ -152,11 +152,11 @@ public class AuthService(UserManager<ApplicationUser> userManager,
             { "{{Year}}", DateTime.UtcNow.Year.ToString() }
             });
 
-        // 👈 استخدام Hangfire مباشرة هنا لرسال الإيميل في الخلفية
-        BackgroundJob.Enqueue(() => emailSender.SendEmailAsync(
+        // 👈 إرسال الإيميل مباشرة لضمان وصوله (بدل Hangfire مؤقتاً)
+        await emailSender.SendEmailAsync(
             user.Email!,
             "Confirm your email",
-            emailBody));
+            emailBody);
 
         return Result.Success();
     }
@@ -224,13 +224,12 @@ public class AuthService(UserManager<ApplicationUser> userManager,
             user.Email,
             encodedToken);
 
-        var origin = httpContextAccessor.HttpContext?
-            .Request.Headers["Origin"]
-            .FirstOrDefault() ?? "https://yourfrontend.com";
+        var request = httpContextAccessor.HttpContext?.Request;
+        var baseUrl = $"{request?.Scheme}://{request?.Host}";
 
         // 6️⃣ إنشاء رابط التأكيد
         var confirmationLink =
-            $"{origin}/confirm-email?userId={user.Id}&code={encodedToken}";
+            $"{baseUrl}/Auth/confirm-email?userId={user.Id}&code={encodedToken}";
 
         // 7️⃣ تجهيز محتوى الإيميل
         var emailBody = EmailBodyBuilder.GenerateEmailBody(
@@ -242,11 +241,11 @@ public class AuthService(UserManager<ApplicationUser> userManager,
             {"{{Year}}", DateTime.UtcNow.Year.ToString() }
             });
 
-        // 👈 استخدام Hangfire مباشرة هنا لرسال الإيميل في الخلفية
-        BackgroundJob.Enqueue(() => emailSender.SendEmailAsync(
+        // 👈 إرسال الإيميل مباشرة لضمان وصوله (بدل Hangfire مؤقتاً)
+        await emailSender.SendEmailAsync(
             user.Email!,
             "Confirm your email",
-            emailBody));
+            emailBody);
 
         return Result.Success();
     }

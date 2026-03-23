@@ -1,7 +1,8 @@
-﻿using Hangfire;
+using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using MalaebBooking.Api;
 using MalaebBooking.Application.Services.HangJobs;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,17 +35,36 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // ================================
+// Auto Migrations 🚀
+// ================================
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<MalaebBooking.Infrastructure.Persistence.ApplicationDbContext>();
+        if (context.Database.GetPendingMigrations().Any())
+        {
+            context.Database.Migrate();
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+    }
+}
+
+// ================================
 // Middleware
 // ================================
-if (app.Environment.IsDevelopment())
+// Swagger enabled for all environments (Development + Production)
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "MalaebBooking API V1");
-        options.RoutePrefix = string.Empty;
-    });
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "MalaebBooking API V1");
+    options.RoutePrefix = string.Empty; // الصفحة الرئيسية هي Swagger
+});
 
 app.UseHangfireDashboard("/Jobs", new DashboardOptions
 {

@@ -1,4 +1,4 @@
-﻿using MailKit.Net.Smtp;
+using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
@@ -27,51 +27,59 @@ namespace MalaebBooking.Infrastructure.Mail
         // ----------------------
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            var message = new MimeMessage();
-
-            // From
-            if (!string.IsNullOrEmpty(mailSettings.DisplayName))
-                message.From.Add(new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail));
-            else
-                message.From.Add(MailboxAddress.Parse(mailSettings.Mail));
-
-            // To
-            message.To.Add(MailboxAddress.Parse(email));
-
-            // Subject
-            message.Subject = subject;
-
-            // Body
-            var bodyBuilder = new BodyBuilder
+            try 
             {
-                HtmlBody = htmlMessage
-            };
-            message.Body = bodyBuilder.ToMessageBody();
+                var message = new MimeMessage();
 
-            using var smtp = new SmtpClient();
+                // From
+                if (!string.IsNullOrEmpty(mailSettings.DisplayName))
+                    message.From.Add(new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail));
+                else
+                    message.From.Add(MailboxAddress.Parse(mailSettings.Mail));
 
-            logger.LogInformation("Sending email to {Email}", email);
+                // To
+                message.To.Add(MailboxAddress.Parse(email));
 
-            // Connect to SMTP server
-            await smtp.ConnectAsync(
-                mailSettings.Host,
-                mailSettings.Port,
-                SecureSocketOptions.StartTls
-            );
+                // Subject
+                message.Subject = subject;
 
-            // Authenticate
-            await smtp.AuthenticateAsync(
-                mailSettings.Mail,
-                mailSettings.Password
-            );
+                // Body
+                var bodyBuilder = new BodyBuilder
+                {
+                    HtmlBody = htmlMessage
+                };
+                message.Body = bodyBuilder.ToMessageBody();
 
-            // Send email
-            await smtp.SendAsync(message);
+                using var smtp = new SmtpClient();
 
-            // Disconnect
-            await smtp.DisconnectAsync(true);
+                logger.LogInformation("Attempting to send email to {Email} via {Host}:{Port}", email, mailSettings.Host, mailSettings.Port);
 
-            logger.LogInformation("Email sent successfully to {Email}", email);
+                // Connect to SMTP server
+                await smtp.ConnectAsync(
+                    mailSettings.Host,
+                    mailSettings.Port,
+                    SecureSocketOptions.SslOnConnect
+                );
+
+                // Authenticate
+                await smtp.AuthenticateAsync(
+                    mailSettings.Mail,
+                    mailSettings.Password
+                );
+
+                // Send email
+                await smtp.SendAsync(message);
+
+                // Disconnect
+                await smtp.DisconnectAsync(true);
+
+                logger.LogInformation("Email sent successfully to {Email}", email);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to send email to {Email}. Error: {Message}", email, ex.Message);
+                throw; // Rethrow so Hangfire knows it failed
+            }
         }
     }
 }
