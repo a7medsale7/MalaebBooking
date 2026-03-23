@@ -1,4 +1,4 @@
-﻿using MalaebBooking.Domain.Consts;
+using MalaebBooking.Domain.Consts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -63,12 +63,35 @@ public class ApplicationRoleClaimConfigurations : IEntityTypeConfiguration<Ident
             Permissions.Reviews_View
         };
 
-        foreach (var permission in ownerPermissions)
+        // 3. Player Permissions
+        var playerPermissions = new List<string>
+        {
+            Permissions.Users_ViewProfile,
+            Permissions.Users_UpdateProfile,
+            Permissions.Users_ChangePassword,
+
+            Permissions.Stadiums_View,
+            Permissions.StadiumImages_View,
+            Permissions.TimeSlots_View,
+            Permissions.SportTypes_View,
+
+            Permissions.Bookings_View,
+            Permissions.Bookings_Create,
+            Permissions.Bookings_Cancel,
+
+            Permissions.Payments_View,
+            Permissions.Payments_SubmitProof,
+
+            Permissions.Reviews_View,
+            Permissions.Reviews_Create
+        };
+
+        foreach (var permission in playerPermissions)
         {
             allClaims.Add(new IdentityRoleClaim<string>
             {
                 Id = claimId++,
-                RoleId = DefaultRoles.OwnerRoleId,
+                RoleId = DefaultRoles.PlayerRoleId,
                 ClaimType = Permissions.Type,
                 ClaimValue = permission
             });
