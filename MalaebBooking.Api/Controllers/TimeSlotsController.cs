@@ -64,4 +64,43 @@ public class TimeSlotsController(ITimeSlotService timeSlotService) : ControllerB
         if (result.IsFailure) return result.Error.Code == "TimeSlot.NotFound" ? NotFound(result.Error) : BadRequest(result.Error);
         return NoContent();
     }
+
+    // ==========================================
+    // Endpoint 1: For the frontend to get preview before saving
+    // ==========================================
+    [HttpPost("preview")]
+    [Authorize(Roles = $"{DefaultRoles.Admin},{DefaultRoles.Owner}", Policy = Permissions.TimeSlots_Create)]
+    public async Task<IActionResult> GeneratePreview([FromBody] PreviewTimeSlotsRequest request)
+    {
+        var result = await _timeSlotService.GeneratePreviewAsync(request);
+
+        if (result.IsFailure)
+        {
+            return result.Error.Code == "TimeSlot.NotFound" || result.Error.Code == "TimeSlot.StadiumNotFound"
+                ? NotFound(result.Error)
+                : BadRequest(result.Error);
+        }
+
+        return Ok(result.Value);
+    }
+
+    // ==========================================
+    // Endpoint 2: For the frontend to submit selected slots and save them in bulk
+    // ==========================================
+    [HttpPost("bulk-create")]
+    [Authorize(Roles = $"{DefaultRoles.Admin},{DefaultRoles.Owner}", Policy = Permissions.TimeSlots_Create)]
+    public async Task<IActionResult> BulkCreate([FromBody] BulkCreateTimeSlotsRequest request)
+    {
+        var result = await _timeSlotService.BulkCreateAsync(request);
+
+        if (result.IsFailure)
+        {
+            return result.Error.Code == "TimeSlot.NotFound" || result.Error.Code == "TimeSlot.StadiumNotFound"
+                ? NotFound(result.Error)
+                : BadRequest(result.Error);
+        }
+
+        // Returns 200 OK if saved successfully
+        return Ok(new { message = "Time slots saved successfully!" });
+    }
 }

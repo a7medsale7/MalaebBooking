@@ -35,4 +35,7 @@ public interface ITimeSlotRepository
     Task UpdateAsync(TimeSlot timeSlot);
 
     Task DeleteAsync(TimeSlot timeSlot);
+
+    Task AddRangeAsync(IEnumerable<TimeSlot> timeSlots);
+
 }

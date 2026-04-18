@@ -14,11 +14,22 @@ public class MappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        // إعدادات الـ Mapping للـ TimeSlotResponse عشان نحسب السعر
+        // إعدادات الـ Mapping للـ TimeSlotResponse عشان نحسب السعر ديناميكي
         config.NewConfig<TimeSlot, MalaebBooking.Application.Contracts.TimeSlots.TimeSlotResponse>()
-            .Map(dest => dest.Price, src => src.Stadium != null 
-                ? (decimal)(src.EndTime - src.StartTime).TotalHours * src.Stadium.PricePerHour 
-                : 0);
+              .Map(dest => dest.Price, src => src.Stadium != null
+                  ? (decimal)(src.EndTime - src.StartTime).TotalHours *
+                    (
+                        // 1. حساب هل الميعاد ده عدّى بداية الليل الخاص بالموسم ولا لأ؟
+                        src.StartTime >= ((src.Date.Month >= 5 && src.Date.Month <= 10) ? src.Stadium.SummerNightStartTime : src.Stadium.WinterNightStartTime)
+
+                            // 2. لو عدّى بداية الليل -> اضرب في سعر الليل
+                            ? src.Stadium.PricePerHourNight
+
+                            // 3. لو لسه -> اضرب في سعر الصبح
+                            : src.Stadium.PricePerHourDay
+                    )
+                  : 0);
+
 
         // إعدادات الـ Mapping للـ BookingDetailsResponse
         config.NewConfig<Booking, BookingDetailsResponse>()

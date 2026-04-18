@@ -1,4 +1,4 @@
-﻿using MalaebBooking.Domain.Consts;
+using MalaebBooking.Domain.Consts;
 using MalaebBooking.Domain.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -36,10 +36,6 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 
         // إضافة البرمشنز بشكل منفصل (Custom Permission Policy)
         claims.AddRange(permissions.Select(permission => new Claim(Permissions.Type, permission)));
-
-        // اختياري: إضافة الرولز والبرمشنز كـ Array لخدمة أي منطق في الـ Frontend لو محتاج
-        claims.Add(new Claim("roles", JsonSerializer.Serialize(roles), JsonClaimValueTypes.JsonArray));
-        claims.Add(new Claim("permissions", JsonSerializer.Serialize(permissions), JsonClaimValueTypes.JsonArray));
 
         var symmetricSecurityKey =
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Key));

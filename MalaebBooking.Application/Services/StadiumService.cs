@@ -1,4 +1,4 @@
-﻿using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Abstractions.Result;
 using MalaebBooking.Application.Contracts.Reviews;
 using MalaebBooking.Application.Contracts.Stadiums;
 using MalaebBooking.Application.Contracts.TimeSlots;
@@ -30,12 +30,16 @@ public class StadiumService(IStadiumRepository stadiumRepository, UserManager<Ap
             return Result.Failure(StadiumErrors.NameTooLong);
         if (string.IsNullOrWhiteSpace(request.Address))
             return Result.Failure(StadiumErrors.AddressRequired);
-        if (request.PricePerHour <= 0)
+        if (request.PricePerHourDay <= 0)
+            return Result.Failure(StadiumErrors.PriceInvalid);
+        if (request.PricePerHourNight <= 0)
             return Result.Failure(StadiumErrors.PriceInvalid);
         if (request.SlotDurationMinutes <= 0)
             return Result.Failure(StadiumErrors.SlotDurationInvalid);
-        if (request.ClosingTime <= request.OpeningTime)
-            return Result.Failure(StadiumErrors.TimeInvalid);
+
+        if (string.IsNullOrWhiteSpace(request.InstapayNumber) && string.IsNullOrWhiteSpace(request.VodafoneCashNumber))
+            return Result.Failure(StadiumErrors.PaymentMethodRequired);
+
         if (request.SportTypeId <= 0)
             return Result.Failure(StadiumErrors.SportTypeIdInvalid);
 
@@ -223,11 +227,13 @@ public class StadiumService(IStadiumRepository stadiumRepository, UserManager<Ap
 
         if (!string.IsNullOrWhiteSpace(request.Name) && request.Name.Length > 200)
             return Result.Failure(StadiumErrors.NameTooLong);
-        if (request.ClosingTime <= request.OpeningTime)
-            return Result.Failure(StadiumErrors.TimeInvalid);
+        // Removed ClosingTime <= OpeningTime validation to allow past-midnight closing times
         if (request.SlotDurationMinutes <= 0)
             return Result.Failure(StadiumErrors.SlotDurationInvalid);
-        if (request.PricePerHour <= 0)
+        if (request.PricePerHourDay <= 0)
+            return Result.Failure(StadiumErrors.PriceInvalid);
+
+        if (request.PricePerHourNight <= 0)
             return Result.Failure(StadiumErrors.PriceInvalid);
 
         request.Adapt(stadium);

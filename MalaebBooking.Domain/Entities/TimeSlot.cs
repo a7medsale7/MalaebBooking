@@ -26,4 +26,7 @@ public class TimeSlot
 
     // ربط الـ Slot بالحجز الخاص بيه (لو موجود)
     public Booking? Booking { get; set; }
+
+    public int? ScheduleRuleId { get; set; }
+    public ScheduleRule? ScheduleRule { get; set; }
 }

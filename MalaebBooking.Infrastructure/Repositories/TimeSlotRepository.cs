@@ -96,4 +96,11 @@ public class TimeSlotRepository : ITimeSlotRepository
         _context.TimeSlots.Update(timeSlot);
         await _context.SaveChangesAsync();
     }
+
+    public async Task AddRangeAsync(IEnumerable<TimeSlot> timeSlots)
+    {
+        await _context.TimeSlots.AddRangeAsync(timeSlots);
+        await _context.SaveChangesAsync();
+    }
+
 }

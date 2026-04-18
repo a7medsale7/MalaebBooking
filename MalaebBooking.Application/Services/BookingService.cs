@@ -38,14 +38,26 @@ public class BookingService : IBookingService
         if (timeSlot is null || timeSlot.Status != SlotStatus.Available)
             return Result.Failure<BookingResponse>(BookingErrors.SlotUnavailable);
 
-        // 2. حساب السعر بناءً على سعر الملعب ومدته
+        // 2. نجيب الملعب عشان نحسب السعر الذكي بتاعنا
         var stadium = await _stadiumRepository.GetByIdAsync(timeSlot.StadiumId);
         if (stadium is null)
             return Result.Failure<BookingResponse>(BookingErrors.StadiumNotFound);
 
-        // حساب المدة بالساعات وضربها في سعر الساعة
+        // -------------- التعديل هنا: حسبة السعر الذكي --------------
         var durationInHours = (timeSlot.EndTime - timeSlot.StartTime).TotalHours;
-        var totalPrice = (decimal)durationInHours * stadium.PricePerHour;
+
+        // تحديد الصيف أو الشتا لبداية الليل
+        int month = timeSlot.Date.Month;
+        bool isSummer = month >= 5 && month <= 10;
+        TimeOnly actualNightStartTime = isSummer ? stadium.SummerNightStartTime : stadium.WinterNightStartTime;
+
+        // هل الحجز ده بالليل ولا الصبح؟
+        bool isNightTime = timeSlot.StartTime >= actualNightStartTime;
+
+        // تحديد السعر اللي هنضرب فيه بناءً على التوقيت
+        var currentRate = isNightTime ? stadium.PricePerHourNight : stadium.PricePerHourDay;
+        var totalPrice = (decimal)durationInHours * currentRate;
+        // -----------------------------------------------------------
 
         // 3. إنشاء الحجز
         var booking = new Booking
@@ -53,7 +65,7 @@ public class BookingService : IBookingService
             PlayerId = playerId,
             TimeSlotId = request.TimeSlotId,
             Status = BookingStatus.Pending,
-            TotalPrice = totalPrice,
+            TotalPrice = totalPrice, // 👈 السعر انضاف صح
             CreatedOn = DateTime.UtcNow,
             ExpiresAt = DateTime.UtcNow.AddMinutes(30) // مهلة 30 دقيقة للدفع
         };

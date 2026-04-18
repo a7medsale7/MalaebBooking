@@ -4,6 +4,7 @@ using MalaebBooking.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MalaebBooking.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260416192902_AddScheduleRule")]
+    partial class AddScheduleRule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -446,9 +449,6 @@ namespace MalaebBooking.Infrastructure.Migrations
                     b.Property<TimeOnly>("ClosingTime")
                         .HasColumnType("time");
 
-                    b.Property<string>("CourtType")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("CreatedById")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -459,9 +459,6 @@ namespace MalaebBooking.Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("Dimensions")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("GoogleMapsUrl")
                         .HasMaxLength(500)
@@ -491,10 +488,7 @@ namespace MalaebBooking.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<decimal>("PricePerHourDay")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("PricePerHourNight")
+                    b.Property<decimal>("PricePerHour")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("SlotDurationMinutes")
@@ -503,20 +497,11 @@ namespace MalaebBooking.Infrastructure.Migrations
                     b.Property<int>("SportTypeId")
                         .HasColumnType("int");
 
-                    b.Property<TimeOnly>("SummerNightStartTime")
-                        .HasColumnType("time");
-
                     b.Property<string>("UpdatedById")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("VodafoneCashNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<TimeOnly>("WinterNightStartTime")
-                        .HasColumnType("time");
 
                     b.HasKey("Id");
 

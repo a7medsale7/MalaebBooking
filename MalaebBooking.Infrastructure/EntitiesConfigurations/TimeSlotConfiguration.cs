@@ -20,5 +20,12 @@ public class TimeSlotConfiguration : IEntityTypeConfiguration<TimeSlot>
                .OnDelete(DeleteBehavior.Cascade);
         // منع الحجوزات المزدوجة فى نفس الوقت لنفس الملعب
         builder.HasIndex(t => new { t.StadiumId, t.Date, t.StartTime }).IsUnique();
+
+        // ربط الـ TimeSlot بالـ ScheduleRule اللي ولّدها (لو موجودة)
+        builder.HasOne(t => t.ScheduleRule)
+               .WithMany(sr => sr.GeneratedTimeSlots)
+               .HasForeignKey(t => t.ScheduleRuleId)
+               .OnDelete(DeleteBehavior.SetNull); // لو مسحنا القاعدة، المواعيد المحجوزة منها متتمسحش، بس تفقد الارتباط
+
     }
 }

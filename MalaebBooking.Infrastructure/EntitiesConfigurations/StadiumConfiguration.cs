@@ -19,7 +19,9 @@ public class StadiumConfiguration : IEntityTypeConfiguration<Stadium>
         builder.Property(s => s.GoogleMapsUrl).HasMaxLength(500);
 
         // دايماً الفلوس بنخلي نوعها (مبلغ دقيق) عشان ميهربش كسور
-        builder.Property(s => s.PricePerHour).HasColumnType("decimal(18,2)");
+        builder.Property(s => s.PricePerHourDay).HasColumnType("decimal(18,2)");
+        builder.Property(s => s.PricePerHourNight).HasColumnType("decimal(18,2)");
+
 
         builder.Property(s => s.PhoneNumber).HasMaxLength(20).IsRequired();
         builder.Property(s => s.InstapayNumber).HasMaxLength(50);

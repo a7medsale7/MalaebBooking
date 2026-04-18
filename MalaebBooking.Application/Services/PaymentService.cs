@@ -53,7 +53,8 @@ public class PaymentService(
             InstapayNumber = stadium.InstapayNumber ?? "غير متاح",
             PaymentStatus = payment != null ? payment.Status.ToString() : null,
             RejectionReason = payment?.RejectionReason,
-            ExpiresAt = booking.ExpiresAt
+            ExpiresAt = booking.ExpiresAt,
+            PaymentScreenshotUrl = payment?.PaymentScreenshotUrl
         };
 
         return Result.Success(response);

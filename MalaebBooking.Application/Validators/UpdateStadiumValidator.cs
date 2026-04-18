@@ -22,7 +22,9 @@ public class UpdateStadiumValidator : AbstractValidator<UpdateStadiumRequest>
         RuleFor(x => x.Description)
             .MaximumLength(1000).WithMessage("Description must be less than 1000 characters.");
 
-        RuleFor(x => x.PricePerHour)
+        RuleFor(x => x.PricePerHourDay)
+            .GreaterThan(0).WithMessage("Price per hour must be greater than 0.");
+        RuleFor(x => x.PricePerHourNight)
             .GreaterThan(0).WithMessage("Price per hour must be greater than 0.");
 
         RuleFor(x => x.PhoneNumber)

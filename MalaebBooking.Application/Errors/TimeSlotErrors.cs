@@ -15,4 +15,11 @@ public static class TimeSlotErrors
         
     public static readonly Error StatusUpdateFailed =
         new("TimeSlot.StatusUpdateFailed", "Cannot update time slot status.");
+
+    public static readonly Error InvalidTimeRange =
+     new("TimeSlot.InvalidTimeRange", "Start time must be before end time.");
+
+    public static readonly Error StadiumNotFound =
+        new("TimeSlot.StadiumNotFound", "Stadium not found.");
+
 }

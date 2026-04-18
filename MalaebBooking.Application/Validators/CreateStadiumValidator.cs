@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using MalaebBooking.Application.Contracts.Stadiums;
 
 namespace MalaebBooking.Application.Validators;
@@ -18,16 +18,19 @@ internal class CreateStadiumValidator : AbstractValidator<CreateStadiumRequest>
         RuleFor(x => x.Description)
             .MaximumLength(1000).WithMessage("Description must be less than 1000 characters.");
 
-        RuleFor(x => x.PricePerHour)
+        RuleFor(x => x.PricePerHourDay)
             .GreaterThan(0).WithMessage("Price per hour must be greater than 0.");
+
+        RuleFor(x => x.PricePerHourNight)
+           .GreaterThan(0).WithMessage("Price per hour must be greater than 0.");
 
         RuleFor(x => x.PhoneNumber)
             .NotEmpty().WithMessage("Phone number is required.")
             .Matches(@"^\+?\d{7,15}$").WithMessage("Invalid phone number format.");
 
-        RuleFor(x => x.OpeningTime)
-            .LessThan(x => x.ClosingTime)
-            .WithMessage("Opening time must be before closing time.");
+        RuleFor(x => x)
+            .Must(x => !string.IsNullOrWhiteSpace(x.InstapayNumber) || !string.IsNullOrWhiteSpace(x.VodafoneCashNumber))
+            .WithMessage("At least one payment method (InstaPay or Vodafone Cash) is required.");
 
         RuleFor(x => x.SlotDurationMinutes)
             .GreaterThan(0).WithMessage("Slot duration must be greater than 0.");

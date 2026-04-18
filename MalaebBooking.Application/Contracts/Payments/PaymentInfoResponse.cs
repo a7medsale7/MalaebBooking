@@ -14,4 +14,6 @@ public class PaymentInfoResponse
     public string PaymentStatus { get; set; }       // Pending / Uploaded / Approved
     public DateTime ExpiresAt { get; set; }         // المهلة قبل ما الحجز ينتهي
     public string? RejectionReason { get; set; }    // سبب الرفض لو اترفض
+
+    public string? PaymentScreenshotUrl { get; set; } // رابط الصورة بتاعة إيصال إنستاباي لو اللاعب رفعها
 }

@@ -65,7 +65,7 @@ public class AuthService(UserManager<ApplicationUser> userManager,
                 claim => claim.RoleId,
                 (role, claim) => new {role,claim}     
                 )
-            .Where(rc => userroles.Contains(rc.role.Name!))
+            .Where(rc => userroles.Contains(rc.role.Name!) && rc.claim.ClaimValue != Permissions.Type)
             .Select(rc => rc.claim.ClaimValue!)
             .Distinct()
             .ToListAsync(cancellationToken);
@@ -285,7 +285,7 @@ public class AuthService(UserManager<ApplicationUser> userManager,
                 claim => claim.RoleId,
                 (role, claim) => new { role, claim }
                 )
-            .Where(rc => userroles.Contains(rc.role.Name!))
+            .Where(rc => userroles.Contains(rc.role.Name!) && rc.claim.ClaimValue != Permissions.Type)
             .Select(rc => rc.claim.ClaimValue!)
             .Distinct()
             .ToListAsync(cancellationToken);

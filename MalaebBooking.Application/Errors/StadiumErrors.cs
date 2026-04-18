@@ -1,4 +1,4 @@
-﻿using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Abstractions.Result;
 
 namespace MalaebBooking.Application.Errors;
 
@@ -48,4 +48,7 @@ public static class StadiumErrors
         new("Stadium.GoogleMapsUrlInvalid", "Google Maps URL is invalid.");
     public static readonly Error NotAuthorized =
         new("SportType.NotAuthorized", "You are not authorized to perform this action.");
+
+    public static readonly Error PaymentMethodRequired =
+        new("Stadium.PaymentMethodRequired", "At least one payment method (InstaPay or Vodafone Cash) is required.");
 }

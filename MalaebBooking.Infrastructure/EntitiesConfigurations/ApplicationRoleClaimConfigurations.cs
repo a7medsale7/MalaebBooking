@@ -86,6 +86,17 @@ public class ApplicationRoleClaimConfigurations : IEntityTypeConfiguration<Ident
             Permissions.Reviews_Create
         };
 
+        foreach (var permission in ownerPermissions)
+        {
+            allClaims.Add(new IdentityRoleClaim<string>
+            {
+                Id = claimId++,
+                RoleId = DefaultRoles.OwnerRoleId,
+                ClaimType = Permissions.Type,
+                ClaimValue = permission
+            });
+        }
+
         foreach (var permission in playerPermissions)
         {
             allClaims.Add(new IdentityRoleClaim<string>

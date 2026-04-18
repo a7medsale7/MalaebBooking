@@ -13,10 +13,20 @@ public class Stadium : Auditable
     public string? Description { get; set; }
     public string Address { get; set; } = string.Empty;
     public string? GoogleMapsUrl { get; set; }
-    public decimal PricePerHour { get; set; }
+
+    // بيانات التواصل والدفع
     public string PhoneNumber { get; set; } = string.Empty;
     public string? InstapayNumber { get; set; }
-
+    public string? VodafoneCashNumber { get; set; }
+    // السعر (مقسم לصبح וليل)
+    public decimal PricePerHourDay { get; set; }
+    public decimal PricePerHourNight { get; set; }
+    // بداية الليل لتعيين السعر (الأونر بيحدده)
+    public TimeOnly SummerNightStartTime { get; set; }
+    public TimeOnly WinterNightStartTime { get; set; }
+    // مساحة وشكل الملعب
+    public string? Dimensions { get; set; }
+    public string? CourtType { get; set; }
     public TimeOnly OpeningTime { get; set; }
     public TimeOnly ClosingTime { get; set; }
     public int SlotDurationMinutes { get; set; } = 60;

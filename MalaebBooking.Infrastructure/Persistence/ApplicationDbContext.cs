@@ -28,6 +28,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser , Applicat
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<Review> Reviews { get; set; }
+    public DbSet<ScheduleRule> ScheduleRules { get; set; }
+
     // RefreshTokens هيبقوا جوا الـ ApplicationUser عشان عملناهم [Owned]
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -27,4 +27,9 @@ public interface ITimeSlotService
     Task<Result<bool>> HasOverlappingSlotsAsync(int stadiumId, DateOnly date, TimeOnly startTime, TimeOnly endTime);
 
     Task<Result<bool>> IsSlotAvailableAsync(int slotId);
+
+    // ================== NEW BULK SYSTEM ==================
+    Task<Result<IEnumerable<PreviewTimeSlotResponse>>> GeneratePreviewAsync(PreviewTimeSlotsRequest request);
+    Task<Result> BulkCreateAsync(BulkCreateTimeSlotsRequest request);
+
 }
