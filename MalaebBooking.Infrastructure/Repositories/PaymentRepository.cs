@@ -1,4 +1,4 @@
-﻿using MalaebBooking.Domain.Abstractions.Repositories;
+using MalaebBooking.Domain.Abstractions.Repositories;
 using MalaebBooking.Domain.Entities;
 using MalaebBooking.Domain.Enums;
 using MalaebBooking.Infrastructure.Persistence;
@@ -37,6 +37,7 @@ public class PaymentRepository : IPaymentRepository
             .Include(p => p.Booking)
                 .ThenInclude(b => b.TimeSlot)
                     .ThenInclude(t => t.Stadium)
+                        .ThenInclude(s => s.OwnerProfile)
             .Include(p => p.Booking)
                 .ThenInclude(b => b.Player)
             .FirstOrDefaultAsync(p => p.Id == id);
@@ -48,6 +49,7 @@ public class PaymentRepository : IPaymentRepository
             .Include(p => p.Booking)
                 .ThenInclude(b => b.TimeSlot)
                     .ThenInclude(t => t.Stadium)
+                        .ThenInclude(s => s.OwnerProfile)
             .Include(p => p.Booking)
                 .ThenInclude(b => b.Player)
             .FirstOrDefaultAsync(p => p.BookingId == bookingId);

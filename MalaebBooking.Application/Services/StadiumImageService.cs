@@ -1,4 +1,4 @@
-﻿// MalaebBooking.Application/Services/StadiumImageService.cs
+// MalaebBooking.Application/Services/StadiumImageService.cs
 
 using MalaebBooking.Application.Abstractions.Result;
 using MalaebBooking.Application.Contracts.Stadiums;
@@ -34,7 +34,7 @@ public class StadiumImageService(
         if (stadium is null)
             return Result.Failure<StadiumImageResponse>(StadiumImageErrors.StadiumNotFound);
 
-        if (stadium.OwnerId != currentUserId)
+        if (stadium.OwnerProfile?.UserId != currentUserId)
             return Result.Failure<StadiumImageResponse>(StadiumImageErrors.NotAuthorized);
 
         // التحقق من الملف
@@ -116,7 +116,7 @@ public class StadiumImageService(
             return Result.Failure(StadiumImageErrors.NotFound);
 
         var stadium = await _stadiumRepository.GetByIdAsync(image.StadiumId, cancellationToken);
-        if (stadium is null || stadium.OwnerId != currentUserId)
+        if (stadium is null || stadium.OwnerProfile?.UserId != currentUserId)
             return Result.Failure(StadiumImageErrors.NotAuthorized);
 
         image.IsPrimary = request.IsPrimary;
@@ -137,7 +137,7 @@ public class StadiumImageService(
             return Result.Failure(StadiumImageErrors.NotFound);
 
         var stadium = await _stadiumRepository.GetByIdAsync(image.StadiumId, cancellationToken);
-        if (stadium is null || stadium.OwnerId != currentUserId)
+        if (stadium is null || stadium.OwnerProfile?.UserId != currentUserId)
             return Result.Failure(StadiumImageErrors.NotAuthorized);
 
         // حذف الملف من الـ Disk

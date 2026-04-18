@@ -30,6 +30,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser , Applicat
     public DbSet<Review> Reviews { get; set; }
     public DbSet<ScheduleRule> ScheduleRules { get; set; }
 
+    public DbSet<StadiumOwnerProfile> StadiumOwnerProfiles { get; set; }
+
+
     // RefreshTokens هيبقوا جوا الـ ApplicationUser عشان عملناهم [Owned]
     protected override void OnModelCreating(ModelBuilder builder)
     {

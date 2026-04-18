@@ -11,9 +11,10 @@ public class ApplicationUser : IdentityUser
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public bool IsDisabled { get; set; }
-    // Navigation Properties
+    // --- الربط مع بروفايل التوثيق الجديد (One-to-One) ---
+    public StadiumOwnerProfile? StadiumOwnerProfile { get; set; }
+    // Navigation Properties (زي ما هي عندك)
     public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
-    public ICollection<Stadium>? OwnedStadiums { get; set; } = [];
     public ICollection<Booking> Bookings { get; set; } = [];
     public ICollection<Review> Reviews { get; set; } = [];
 }

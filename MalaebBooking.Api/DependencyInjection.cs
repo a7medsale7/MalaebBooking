@@ -78,6 +78,7 @@ public static class DependencyInjection
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IScheduleRuleRepository, ScheduleRuleRepository>();
+        services.AddScoped<IStadiumOwnerProfileRepository, StadiumOwnerProfileRepository>();
 
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -105,6 +106,7 @@ public static class DependencyInjection
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IUserService , UserService>();
         services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<IStadiumOwnerService, StadiumOwnerService>();
         // 👈 إضافة المهام المجدولة للـ Dependency Injection
         services.AddScoped<BookingBackgroundJobs>();
 

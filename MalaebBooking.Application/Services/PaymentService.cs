@@ -1,4 +1,4 @@
-﻿using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Abstractions.Result;
 using MalaebBooking.Application.Contracts.Payments;
 using MalaebBooking.Application.Errors;
 using MalaebBooking.Domain.Abstractions.Repositories;
@@ -161,7 +161,7 @@ public class PaymentService(
 
         // نتأكد إن ده صاحب الملعب بتاع الحجز  
         var stadium = payment.Booking.TimeSlot.Stadium;
-        if (stadium.OwnerId != ownerId)
+        if (stadium.OwnerProfile?.UserId != ownerId)
             return Result.Failure(PaymentErrors.NotAuthorized);
 
         // نتأكد إن في إيصال مرفوع فعلاً
@@ -209,7 +209,7 @@ public class PaymentService(
 
         // نتأكد إن ده صاحب الملعب
         var stadium = payment.Booking.TimeSlot.Stadium;
-        if (stadium.OwnerId != ownerId)
+        if (stadium.OwnerProfile?.UserId != ownerId)
             return Result.Failure(PaymentErrors.NotAuthorized);
 
         if (payment.Status != PaymentStatus.Uploaded)

@@ -1,4 +1,4 @@
-﻿using MalaebBooking.Domain.Abstractions.Repositories;
+using MalaebBooking.Domain.Abstractions.Repositories;
 using MalaebBooking.Domain.Entities;
 using MalaebBooking.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -10,15 +10,15 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace MalaebBooking.Infrastructure.Repositories;
+
 public class StadiumRepository(ApplicationDbContext context) : IStadiumRepository
 {
     private readonly ApplicationDbContext _context = context;
 
     public async Task AddAsync(Stadium stadium, CancellationToken cancellationToken = default)
     {
-     
         await _context.Stadiums.AddAsync(stadium, cancellationToken);
-       await _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
@@ -30,34 +30,46 @@ public class StadiumRepository(ApplicationDbContext context) : IStadiumRepositor
     public async Task<List<Stadium>> GetActiveAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Stadiums
-     .AsNoTracking()
-     .Include(s => s.Images) // ✅ زود
-     .Where(x => x.IsActive)
-     .ToListAsync(cancellationToken);
+            .AsNoTracking()
+            .Include(s => s.Images)
+            .Include(s => s.SportType)         // 👈 Addition
+            .Include(s => s.OwnerProfile)      // جلب البروفايل
+                .ThenInclude(p => p.User)      // جلب بيانات اليوزر (الاسم والموبايل)
+            .Where(x => x.IsActive)
+            .ToListAsync(cancellationToken);
     }
+
     public async Task<List<Stadium>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Stadiums
-    .AsNoTracking()
-    .Include(s => s.Images) // ✅ زود
-    .ToListAsync(cancellationToken);
-
+            .AsNoTracking()
+            .Include(s => s.Images)
+            .Include(s => s.SportType)
+            .Include(s => s.OwnerProfile)
+                .ThenInclude(p => p.User)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<Stadium?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _context.Stadiums
-     .Include(s => s.Images) // ✅ زود
-     .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            .Include(s => s.Images)
+            .Include(s => s.SportType)
+            .Include(s => s.OwnerProfile)
+                .ThenInclude(p => p.User)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
     public async Task<List<Stadium>> GetBySportTypeAsync(int sportTypeId, CancellationToken cancellationToken = default)
     {
         return await _context.Stadiums
-     .AsNoTracking()
-     .Include(s => s.Images) // ✅ زود
-     .Where(x => x.SportTypeId == sportTypeId && x.IsActive)
-     .ToListAsync(cancellationToken);
+            .AsNoTracking()
+            .Include(s => s.Images)
+            .Include(s => s.SportType)
+            .Include(s => s.OwnerProfile)
+                .ThenInclude(p => p.User)
+            .Where(x => x.SportTypeId == sportTypeId && x.IsActive)
+            .ToListAsync(cancellationToken);
     }
 
     public Task<Stadium?> GetDetailsAsync(int id, CancellationToken cancellationToken = default)
@@ -65,7 +77,8 @@ public class StadiumRepository(ApplicationDbContext context) : IStadiumRepositor
         return _context.Stadiums
             .AsNoTracking()
             .Include(s => s.SportType)
-            .Include(s => s.Owner) // جلب الـ Owner
+            .Include(s => s.OwnerProfile)       // تصحيح: اسم الخاصية وليس الـ Id
+                .ThenInclude(p => p.User)
             .Include(s => s.Images)
             .Include(s => s.TimeSlots)
             .Include(s => s.Reviews)

@@ -33,10 +33,10 @@ public class Stadium : Auditable
     public bool IsActive { get; set; } = true;
     // Foreign Keys
     public int SportTypeId { get; set; }
-    public string OwnerId { get; set; } = string.Empty;
+    public int OwnerProfileId { get; set; }
+    public StadiumOwnerProfile OwnerProfile { get; set; } = default!;
     // Navigation Properties
     public SportType SportType { get; set; } = default!;
-    public ApplicationUser? Owner { get; set; } = default!;
     public ICollection<StadiumImage> Images { get; set; } = [];
     public ICollection<TimeSlot> TimeSlots { get; set; } = [];
     public ICollection<Review> Reviews { get; set; } = [];

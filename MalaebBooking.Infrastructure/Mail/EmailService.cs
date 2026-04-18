@@ -1,4 +1,4 @@
-using MailKit.Net.Smtp;
+﻿using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
@@ -55,11 +55,13 @@ namespace MalaebBooking.Infrastructure.Mail
                 logger.LogInformation("Attempting to send email to {Email} via {Host}:{Port}", email, mailSettings.Host, mailSettings.Port);
 
                 // Use settings from Configuration (appsettings.json)
+                // استخدام خيار Auto عشان السيرفر هو اللي يحدد نوع التشفير المناسب للبورت
                 await smtp.ConnectAsync(
                     mailSettings.Host,
                     mailSettings.Port,
-                    SecureSocketOptions.SslOnConnect
+                    SecureSocketOptions.Auto
                 );
+
 
                 await smtp.AuthenticateAsync(
                     mailSettings.Mail,

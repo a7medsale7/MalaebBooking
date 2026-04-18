@@ -1,4 +1,4 @@
-﻿using MalaebBooking.Domain.Abstractions.Repositories;
+using MalaebBooking.Domain.Abstractions.Repositories;
 using MalaebBooking.Domain.Entities;
 using MalaebBooking.Domain.Enums;
 using MalaebBooking.Infrastructure.Persistence;
@@ -33,7 +33,8 @@ public class BookingRepository : IBookingRepository
             .Include(x => x.Player)
             .Include(x => x.TimeSlot)
                 .ThenInclude(t => t.Stadium)
-                    .ThenInclude(s => s.Owner)
+                    .ThenInclude(s => s.OwnerProfile)
+                        .ThenInclude(p => p.User)
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 

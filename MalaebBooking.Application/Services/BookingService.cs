@@ -1,4 +1,4 @@
-﻿using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Abstractions.Result;
 using MalaebBooking.Application.Contracts.Bookings;
 using MalaebBooking.Application.Errors;
 using MalaebBooking.Domain.Abstractions.Repositories;
@@ -107,9 +107,9 @@ public class BookingService : IBookingService
         }
 
         // 3. إرسال إيميل لصاحب الملعب في الخلفية
-        if (booking.TimeSlot?.Stadium?.Owner?.Email != null)
+        if (booking.TimeSlot?.Stadium?.OwnerProfile?.User?.Email != null)
         {
-            var ownerEmail = booking.TimeSlot.Stadium.Owner.Email;
+            var ownerEmail = booking.TimeSlot.Stadium.OwnerProfile.User.Email;
             var stadiumName = booking.TimeSlot.Stadium.Name;
             var playerName = booking.Player != null ? $"{booking.Player.FirstName} {booking.Player.LastName}" : "لاعب";
             var date = booking.TimeSlot.Date.ToString("yyyy-MM-dd");

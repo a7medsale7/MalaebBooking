@@ -32,9 +32,13 @@ public class StadiumConfiguration : IEntityTypeConfiguration<Stadium>
                .HasForeignKey(s => s.SportTypeId)
                .OnDelete(DeleteBehavior.Restrict);
         // 2. الملعب بيملكه يوزر واحد (Owner)
-        builder.HasOne(s => s.Owner)
-               .WithMany(u => u.OwnedStadiums)
-               .HasForeignKey(s => s.OwnerId)
-               .OnDelete(DeleteBehavior.Restrict); // مبنحذفش الملاعب لو صاحبها اتمسح عشان التاريخ
+        // جوا ميثود Configure في ملف StadiumConfiguration.cs
+        // استبدل الجزء القديم بتاع المالك بده:
+
+        builder.HasOne(s => s.OwnerProfile)
+               .WithMany(p => p.Stadiums)
+               .HasForeignKey(s => s.OwnerProfileId)
+               .OnDelete(DeleteBehavior.Restrict);
+
     }
 }

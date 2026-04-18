@@ -67,6 +67,12 @@ public static class Permissions
     public const string Roles_ToggleActive = "Permissions.Roles.ToggleActive";
 
 
+    // Stadium Owner Profiles
+    public const string OwnerProfiles_View = "Permissions.OwnerProfiles.View";
+    public const string OwnerProfiles_Apply = "Permissions.OwnerProfiles.Apply";
+    public const string OwnerProfiles_Review = "Permissions.OwnerProfiles.Review";
+
+
 
     public static IList<string?> GetAllPermissions()=>
         typeof(Permissions).GetFields().Select(f => f.GetValue(f) as string).ToList();
