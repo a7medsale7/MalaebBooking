@@ -1,4 +1,4 @@
-﻿using MalaebBooking.Domain.Entities;
+using MalaebBooking.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +21,8 @@ public interface IStadiumRepository
     Task<List<Stadium>> GetActiveAsync(CancellationToken cancellationToken = default);
 
     Task<List<Stadium>> GetBySportTypeAsync(int sportTypeId, CancellationToken cancellationToken = default);
+
+    Task<List<Stadium>> GetByOwnerUserIdAsync(string userId, CancellationToken cancellationToken = default);
 
     Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
 }

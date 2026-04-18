@@ -72,6 +72,18 @@ public class StadiumRepository(ApplicationDbContext context) : IStadiumRepositor
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Stadium>> GetByOwnerUserIdAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Stadiums
+            .AsNoTracking()
+            .Include(s => s.Images)
+            .Include(s => s.SportType)
+            .Include(s => s.OwnerProfile)
+                .ThenInclude(p => p.User)
+            .Where(x => x.OwnerProfile.UserId == userId)
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<Stadium?> GetDetailsAsync(int id, CancellationToken cancellationToken = default)
     {
         return _context.Stadiums

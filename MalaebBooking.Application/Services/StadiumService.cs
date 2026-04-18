@@ -136,6 +136,16 @@ public class StadiumService(
         return Result.Success();
     }
 
+    // ================== GET MY STADIUMS ==================
+    public async Task<Result<List<StadiumResponse>>> GetMyStadiumsAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var stadiums = await _stadiumRepository.GetByOwnerUserIdAsync(userId, cancellationToken);
+        
+        var response = stadiums.Select(s => MapToStadiumResponse(s)).ToList();
+        
+        return Result.Success(response);
+    }
+
     // --- Private Helper Method عشان نوحد شكل الـ Response ---
     private static StadiumResponse MapToStadiumResponse(Stadium stadium)
     {

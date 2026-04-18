@@ -40,5 +40,13 @@ public class StadiumConfiguration : IEntityTypeConfiguration<Stadium>
                .HasForeignKey(s => s.OwnerProfileId)
                .OnDelete(DeleteBehavior.Restrict);
 
+        builder.Property(s => s.Governorate)
+       .HasMaxLength(100)
+       .IsRequired();
+
+        builder.Property(s => s.District)
+               .HasMaxLength(100)
+               .IsRequired();
+
     }
 }

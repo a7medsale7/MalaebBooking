@@ -1,4 +1,4 @@
-﻿// 6. StadiumsController.cs
+// 6. StadiumsController.cs
 using MalaebBooking.Application.Abstractions.Result;
 using MalaebBooking.Application.Contracts.Stadiums;
 using MalaebBooking.Application.Services;
@@ -54,6 +54,17 @@ public class StadiumsController(IStadiumService stadiumService) : ControllerBase
     {
         var result = await _stadiumService.GetStadiumsBySportTypeAsync(sportTypeId);
         return result.IsFailure ? NotFound(result.Error) : Ok(result.Value);
+    }
+
+    [HttpGet("my-stadiums")]
+    [Authorize(Roles = DefaultRoles.Owner, Policy = Permissions.Stadiums_View)]
+    public async Task<IActionResult> GetMyStadiums()
+    {
+        var currentUserId = User.FindFirstValue(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub);
+        if (currentUserId is null) return Unauthorized();
+
+        var result = await _stadiumService.GetMyStadiumsAsync(currentUserId);
+        return result.IsFailure ? BadRequest(result.Error) : Ok(result.Value);
     }
 
     [HttpPost]

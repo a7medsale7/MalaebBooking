@@ -1,4 +1,4 @@
-﻿using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Abstractions.Result;
 using MalaebBooking.Application.Contracts.Stadiums;
 
 namespace MalaebBooking.Application.Services;
@@ -44,5 +44,10 @@ public interface IStadiumService
     // ================== TOGGLE ACTIVE ==================
     Task<Result> ToggleStadiumActiveAsync(
         int stadiumId,
+        CancellationToken cancellationToken = default);
+
+    // ================== GET MY STADIUMS ==================
+    Task<Result<List<StadiumResponse>>> GetMyStadiumsAsync(
+        string userId,
         CancellationToken cancellationToken = default);
 }
