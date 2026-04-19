@@ -1,5 +1,7 @@
-﻿using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Contracts;
 using MalaebBooking.Application.Contracts.Bookings;
+using MalaebBooking.Application.Contracts.Common;
 using MalaebBooking.Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -14,7 +16,7 @@ public interface IBookingService
 
     // ==================== Read ====================
     Task<Result<BookingDetailsResponse>> GetBookingByIdAsync(int id);
-    Task<Result<IEnumerable<BookingDetailsResponse>>> GetAllBookingsAsync();
+    Task<Result<PaginatedResponse<BookingDetailsResponse>>> GetAllBookingsAsync(RequestFilters filters);
     Task<Result<IEnumerable<BookingDetailsResponse>>> GetBookingsByUserAsync(string userId);
     Task<Result<IEnumerable<BookingDetailsResponse>>> GetBookingsByStadiumAsync(int stadiumId);
     Task<Result<IEnumerable<BookingDetailsResponse>>> GetBookingsByStatusAsync(BookingStatus status);

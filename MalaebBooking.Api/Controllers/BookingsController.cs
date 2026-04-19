@@ -1,4 +1,5 @@
-﻿// 1. BookingsController.cs
+// 1. BookingsController.cs
+using MalaebBooking.Application.Contracts;
 using MalaebBooking.Application.Contracts.Bookings;
 using MalaebBooking.Application.Services;
 using MalaebBooking.Domain.Consts;
@@ -56,9 +57,9 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
 
     [HttpGet]
     [Authorize(Roles = DefaultRoles.Admin, Policy = Permissions.Bookings_View)]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] RequestFilters filters)
     {
-        var result = await _bookingService.GetAllBookingsAsync();
+        var result = await _bookingService.GetAllBookingsAsync(filters);
         return result.IsFailure ? BadRequest(result.Error) : Ok(result.Value);
     }
 

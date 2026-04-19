@@ -1,4 +1,6 @@
-﻿using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Contracts;
+using MalaebBooking.Application.Contracts.Common;
 using MalaebBooking.Application.Contracts.Roles;
 using MalaebBooking.Application.Contracts.Users;
 using System;
@@ -10,7 +12,7 @@ using System.Threading.Tasks;
 namespace MalaebBooking.Application.Services;
 public interface IUserService
 {
-    Task<IEnumerable<UserResponse>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<Result<PaginatedResponse<UserResponse>>> GetAllAsync(RequestFilters filters, CancellationToken cancellationToken = default);
     Task<Result<UserResponse>> GetAsync(string id); 
     Task<Result<UserProfileResponse>> GetProfileAsync(string userId);
     Task<Result<UserProfileResponse>> UpdateProfileAsync(string userId, UpdateProfileRequest request);

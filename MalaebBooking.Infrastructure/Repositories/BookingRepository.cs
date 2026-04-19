@@ -176,4 +176,41 @@ public class BookingRepository : IBookingRepository
             .ToListAsync();
     }
 
+    public async Task<(List<Booking> Items, int TotalCount)> GetPagedAsync(
+        int pageNumber,
+        int pageSize,
+        string? searchValue,
+        string? sortColumn,
+        string? sortDirection,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Bookings
+            .Include(x => x.TimeSlot)
+                .ThenInclude(t => t.Stadium)
+            .Include(x => x.Player)
+            .AsNoTracking()
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(searchValue))
+        {
+            query = query.Where(b => b.Player.FirstName.Contains(searchValue) || 
+                                     b.Player.LastName.Contains(searchValue) ||
+                                     b.TimeSlot.Stadium.Name.Contains(searchValue));
+        }
+
+        // Sorting
+        query = sortColumn?.ToLower() switch
+        {
+            "date" => sortDirection == "desc" ? query.OrderByDescending(b => b.CreatedOn) : query.OrderBy(b => b.CreatedOn),
+            _ => query.OrderByDescending(b => b.Id)
+        };
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
 }

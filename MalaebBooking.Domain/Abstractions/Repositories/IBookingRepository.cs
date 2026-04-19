@@ -1,4 +1,4 @@
-﻿using MalaebBooking.Domain.Entities;
+using MalaebBooking.Domain.Entities;
 using MalaebBooking.Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -51,4 +51,12 @@ public interface IBookingRepository
     Task<IEnumerable<Booking>> GetExpiredPendingBookingsAsync();
     // بتجيب الحجوزات اللي ميعادها كمان x من الوقت
     Task<IEnumerable<Booking>> GetUpcomingBookingsAsync(TimeSpan timeAhead);
+
+    Task<(List<Booking> Items, int TotalCount)> GetPagedAsync(
+        int pageNumber,
+        int pageSize,
+        string? searchValue,
+        string? sortColumn,
+        string? sortDirection,
+        CancellationToken cancellationToken = default);
 }

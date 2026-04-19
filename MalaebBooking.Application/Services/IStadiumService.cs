@@ -1,4 +1,5 @@
 using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Contracts.Common;
 using MalaebBooking.Application.Contracts.Stadiums;
 
 namespace MalaebBooking.Application.Services;
@@ -19,7 +20,8 @@ public interface IStadiumService
         CancellationToken cancellationToken = default);
 
     // ================== GET ALL STADIUMS ==================
-    Task<Result<List<StadiumResponse>>> GetAllStadiumsAsync(
+    Task<Result<PaginatedResponse<StadiumResponse>>> GetAllStadiumsAsync(
+        StadiumFilters filters,
         CancellationToken cancellationToken = default);
 
     // ================== GET ACTIVE STADIUMS ==================

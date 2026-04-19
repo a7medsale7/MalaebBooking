@@ -1,4 +1,5 @@
-﻿// 8. UsersController.cs
+// 8. UsersController.cs
+using MalaebBooking.Application.Contracts;
 using MalaebBooking.Application.Contracts.Users;
 using MalaebBooking.Application.Services;
 using MalaebBooking.Domain.Consts;
@@ -50,10 +51,10 @@ public class UsersController(IUserService userService) : ControllerBase
 
     [HttpGet("all")]
     [Authorize(Roles = DefaultRoles.Admin, Policy = Permissions.Users_ViewAll)]
-    public async Task<IActionResult> GetAllUsers()
+    public async Task<IActionResult> GetAllUsers([FromQuery] RequestFilters filters)
     {
-        var result = await _userService.GetAllAsync();
-        return Ok(result);
+        var result = await _userService.GetAllAsync(filters);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     [HttpPost("forgot-password")]

@@ -1,4 +1,6 @@
 using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Contracts;
+using MalaebBooking.Application.Contracts.Common;
 using MalaebBooking.Application.Contracts.Payments;
 using MalaebBooking.Application.Errors;
 using MalaebBooking.Domain.Abstractions.Repositories;
@@ -7,19 +9,54 @@ using MalaebBooking.Domain.Enums;
 using Microsoft.AspNetCore.Hosting;
 using Hangfire;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Mapster;
 
 namespace MalaebBooking.Application.Services;
 
-public class PaymentService(
-    IPaymentRepository paymentRepository,
-    IBookingRepository bookingRepository,
-    IWebHostEnvironment env,
-    IEmailSender emailSender) : IPaymentService
+public class PaymentService : IPaymentService
 {
-    private readonly IPaymentRepository _paymentRepository = paymentRepository;
-    private readonly IBookingRepository _bookingRepository = bookingRepository;
-    private readonly IWebHostEnvironment _env = env;
-    private readonly IEmailSender _emailSender = emailSender;
+    private readonly IPaymentRepository _paymentRepository;
+    private readonly IBookingRepository _bookingRepository;
+    private readonly IWebHostEnvironment _env;
+    private readonly IEmailSender _emailSender;
+
+    public PaymentService(
+        IPaymentRepository paymentRepository,
+        IBookingRepository bookingRepository,
+        IWebHostEnvironment env,
+        IEmailSender emailSender)
+    {
+        _paymentRepository = paymentRepository;
+        _bookingRepository = bookingRepository;
+        _env = env;
+        _emailSender = emailSender;
+    }
+
+    public async Task<Result<PaginatedResponse<PaymentResponse>>> GetAllPaymentsAsync(RequestFilters filters)
+    {
+        var (items, totalCount) = await _paymentRepository.GetPagedAsync(
+            filters.PageNumber,
+            filters.PageSize,
+            filters.SearchValue,
+            filters.SortColumn,
+            filters.SortDirection);
+
+        var paymentResponses = items.Select(p => p.Adapt<PaymentResponse>()).ToList();
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)filters.PageSize);
+        var hasNextPage = filters.PageNumber < totalPages;
+        var hasPreviousPage = filters.PageNumber > 1;
+
+        var response = new PaginatedResponse<PaymentResponse>(
+            paymentResponses,
+            totalCount,
+            filters.PageNumber,
+            totalPages,
+            hasNextPage,
+            hasPreviousPage);
+
+        return Result.Success(response);
+    }
 
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
     private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5MB

@@ -102,4 +102,61 @@ public class StadiumRepository(ApplicationDbContext context) : IStadiumRepositor
         _context.Stadiums.Update(stadium);
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<(List<Stadium> Items, int TotalCount)> GetFilteredPagedAsync(
+        string? governorate,
+        string? district,
+        decimal? minPrice,
+        decimal? maxPrice,
+        int pageNumber,
+        int pageSize,
+        string? searchValue,
+        string? sortColumn,
+        string? sortDirection,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Stadiums
+            .AsNoTracking()
+            .Include(s => s.Images)
+            .Include(s => s.SportType)
+            .Include(s => s.OwnerProfile)
+                .ThenInclude(p => p.User)
+            .AsQueryable();
+
+        // Filtering
+        if (!string.IsNullOrEmpty(governorate))
+            query = query.Where(s => s.Governorate.Contains(governorate));
+
+        if (!string.IsNullOrEmpty(district))
+            query = query.Where(s => s.District.Contains(district));
+
+        if (minPrice.HasValue)
+            query = query.Where(s => s.PricePerHourDay >= minPrice.Value || s.PricePerHourNight >= minPrice.Value);
+
+        if (maxPrice.HasValue)
+            query = query.Where(s => s.PricePerHourDay <= maxPrice.Value || s.PricePerHourNight <= maxPrice.Value);
+
+        if (!string.IsNullOrEmpty(searchValue))
+        {
+            query = query.Where(s => s.Name.Contains(searchValue) || 
+                                     (s.Description != null && s.Description.Contains(searchValue)) || 
+                                     s.Address.Contains(searchValue));
+        }
+
+        // Sorting
+        query = sortColumn?.ToLower() switch
+        {
+            "price" => sortDirection == "desc" ? query.OrderByDescending(s => s.PricePerHourDay) : query.OrderBy(s => s.PricePerHourDay),
+            "name" => sortDirection == "desc" ? query.OrderByDescending(s => s.Name) : query.OrderBy(s => s.Name),
+            _ => query.OrderByDescending(s => s.Id)
+        };
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
 }

@@ -1,4 +1,6 @@
-﻿using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Contracts;
+using MalaebBooking.Application.Contracts.Common;
 using MalaebBooking.Application.Contracts.Payments;
 using Microsoft.AspNetCore.Http;
 
@@ -6,6 +8,9 @@ namespace MalaebBooking.Application.Services;
 
 public interface IPaymentService
 {
+    // ================== GET ALL PAYMENTS (Admin/Owner) ==================
+    Task<Result<PaginatedResponse<PaymentResponse>>> GetAllPaymentsAsync(RequestFilters filters);
+
     // ================== GET PAYMENT INFO (اللاعب يشوف رقم InstaPay والمبلغ) ==================
     Task<Result<PaymentInfoResponse>> GetPaymentInfoAsync(int bookingId, string playerId);
 

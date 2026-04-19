@@ -1,11 +1,15 @@
 using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Contracts;
 using MalaebBooking.Application.Contracts.Bookings;
+using MalaebBooking.Application.Contracts.Common;
 using MalaebBooking.Application.Errors;
 using MalaebBooking.Domain.Abstractions.Repositories;
 using MalaebBooking.Domain.Entities;
 using MalaebBooking.Domain.Enums;
 using Mapster;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Hangfire;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -173,10 +177,30 @@ public class BookingService : IBookingService
         return Result.Success();
     }
 
-    public async Task<Result<IEnumerable<BookingDetailsResponse>>> GetAllBookingsAsync()
+    public async Task<Result<PaginatedResponse<BookingDetailsResponse>>> GetAllBookingsAsync(RequestFilters filters)
     {
-        var bookings = await _bookingRepository.GetAllAsync();
-        return Result.Success(bookings.Adapt<IEnumerable<BookingDetailsResponse>>());
+        var (items, totalCount) = await _bookingRepository.GetPagedAsync(
+            filters.PageNumber,
+            filters.PageSize,
+            filters.SearchValue,
+            filters.SortColumn,
+            filters.SortDirection);
+
+        var bookingResponses = items.Select(b => b.Adapt<BookingDetailsResponse>()).ToList();
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)filters.PageSize);
+        var hasNextPage = filters.PageNumber < totalPages;
+        var hasPreviousPage = filters.PageNumber > 1;
+
+        var response = new PaginatedResponse<BookingDetailsResponse>(
+            bookingResponses,
+            totalCount,
+            filters.PageNumber,
+            totalPages,
+            hasNextPage,
+            hasPreviousPage);
+
+        return Result.Success(response);
     }
 
     public async Task<Result<BookingDetailsResponse>> GetBookingByIdAsync(int id)

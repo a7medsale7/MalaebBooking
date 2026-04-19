@@ -1,4 +1,4 @@
-﻿using MalaebBooking.Domain.Entities;
+using MalaebBooking.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,4 +20,12 @@ public interface IPaymentRepository
     Task<bool> ExistsByBookingIdAsync(int bookingId);
 
     Task<IEnumerable<Payment>> GetPaymentsOlderThanAsync(DateTime date);
+
+    Task<(List<Payment> Items, int TotalCount)> GetPagedAsync(
+        int pageNumber,
+        int pageSize,
+        string? searchValue,
+        string? sortColumn,
+        string? sortDirection,
+        CancellationToken cancellationToken = default);
 }

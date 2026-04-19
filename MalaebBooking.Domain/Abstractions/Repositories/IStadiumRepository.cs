@@ -25,4 +25,16 @@ public interface IStadiumRepository
     Task<List<Stadium>> GetByOwnerUserIdAsync(string userId, CancellationToken cancellationToken = default);
 
     Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
+
+    Task<(List<Stadium> Items, int TotalCount)> GetFilteredPagedAsync(
+        string? governorate,
+        string? district,
+        decimal? minPrice,
+        decimal? maxPrice,
+        int pageNumber,
+        int pageSize,
+        string? searchValue,
+        string? sortColumn,
+        string? sortDirection,
+        CancellationToken cancellationToken = default);
 }

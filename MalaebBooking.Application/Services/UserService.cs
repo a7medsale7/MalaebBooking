@@ -1,5 +1,7 @@
-﻿using Hangfire;
+using Hangfire;
 using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Contracts;
+using MalaebBooking.Application.Contracts.Common;
 using MalaebBooking.Application.Contracts.Roles;
 using MalaebBooking.Application.Contracts.Users;
 using MalaebBooking.Application.Errors;
@@ -39,34 +41,66 @@ public class UserService : IUserService
         _roleService = roleService;
     }
 
-    public async Task<IEnumerable<UserResponse>> GetAllAsync(CancellationToken cancellationToken = default) =>
-    await (from u in _context.Users
-           join ur in _context.UserRoles
-           on u.Id equals ur.UserId
-           join r in _context.Roles
-           on ur.RoleId equals r.Id into roles
-           where !roles.Any(x => x.Name == DefaultRoles.Player)
-           select new
-           {
-               u.Id,
-               u.FirstName,
-               u.LastName,
-               u.Email,
-               u.IsDisabled,
-               Roles = roles.Select(x => x.Name!).ToList()
-           }
-            )
-            .GroupBy(u => new { u.Id, u.FirstName, u.LastName, u.Email, u.IsDisabled })
-           .Select(u => new UserResponse
-           {
-               Id = u.Key.Id,
-               FirstName = u.Key.FirstName,
-               LastName = u.Key.LastName,
-               Email = u.Key.Email,
-               IsDisabled = u.Key.IsDisabled,
-               Roles = u.SelectMany(x => x.Roles)
-           })
-           .ToListAsync(cancellationToken);
+    public async Task<Result<PaginatedResponse<UserResponse>>> GetAllAsync(RequestFilters filters, CancellationToken cancellationToken = default)
+    {
+        var query = (from u in _context.Users
+                     join ur in _context.UserRoles on u.Id equals ur.UserId
+                     join r in _context.Roles on ur.RoleId equals r.Id into roles
+                     where !roles.Any(x => x.Name == DefaultRoles.Player)
+                     select new
+                     {
+                         u.Id,
+                         u.FirstName,
+                         u.LastName,
+                         u.Email,
+                         u.IsDisabled,
+                         Roles = roles.Select(x => x.Name!).ToList()
+                     })
+                     .GroupBy(u => new { u.Id, u.FirstName, u.LastName, u.Email, u.IsDisabled })
+                     .Select(u => new UserResponse
+                     {
+                         Id = u.Key.Id,
+                         FirstName = u.Key.FirstName,
+                         LastName = u.Key.LastName,
+                         Email = u.Key.Email,
+                         IsDisabled = u.Key.IsDisabled,
+                         Roles = u.SelectMany(x => x.Roles)
+                     });
+
+        if (!string.IsNullOrEmpty(filters.SearchValue))
+        {
+            query = query.Where(u => u.FirstName.Contains(filters.SearchValue) || 
+                                     u.LastName.Contains(filters.SearchValue) || 
+                                     u.Email.Contains(filters.SearchValue));
+        }
+
+        // Sorting
+        query = filters.SortColumn?.ToLower() switch
+        {
+            "name" => filters.SortDirection == "desc" ? query.OrderByDescending(u => u.FirstName) : query.OrderBy(u => u.FirstName),
+            _ => query.OrderByDescending(u => u.Id)
+        };
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .Skip((filters.PageNumber - 1) * filters.PageSize)
+            .Take(filters.PageSize)
+            .ToListAsync(cancellationToken);
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)filters.PageSize);
+        var hasNextPage = filters.PageNumber < totalPages;
+        var hasPreviousPage = filters.PageNumber > 1;
+
+        var response = new PaginatedResponse<UserResponse>(
+            items,
+            totalCount,
+            filters.PageNumber,
+            totalPages,
+            hasNextPage,
+            hasPreviousPage);
+
+        return Result.Success(response);
+    }
 
     public async Task<Result<UserResponse>> GetAsync(string id)
     {

@@ -1,4 +1,6 @@
 using MalaebBooking.Application.Abstractions.Result;
+using MalaebBooking.Application.Contracts;
+using MalaebBooking.Application.Contracts.Common;
 using MalaebBooking.Application.Contracts.Reviews;
 using MalaebBooking.Application.Contracts.Stadiums;
 using MalaebBooking.Application.Contracts.TimeSlots;
@@ -60,12 +62,36 @@ public class StadiumService(
     }
 
     // ================== GET ALL STADIUMS ==================
-    public async Task<Result<List<StadiumResponse>>> GetAllStadiumsAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedResponse<StadiumResponse>>> GetAllStadiumsAsync(
+        StadiumFilters filters,
+        CancellationToken cancellationToken = default)
     {
-        var stadiums = await _stadiumRepository.GetAllAsync(cancellationToken);
-        if (stadiums == null || !stadiums.Any()) return Result.Failure<List<StadiumResponse>>(StadiumErrors.NotFound);
+        var (items, totalCount) = await _stadiumRepository.GetFilteredPagedAsync(
+            filters.Governorate,
+            filters.District,
+            filters.MinPrice,
+            filters.MaxPrice,
+            filters.PageNumber,
+            filters.PageSize,
+            filters.SearchValue,
+            filters.SortColumn,
+            filters.SortDirection,
+            cancellationToken);
 
-        var response = stadiums.Select(s => MapToStadiumResponse(s)).ToList();
+        var stadiumResponses = items.Select(MapToStadiumResponse).ToList();
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)filters.PageSize);
+        var hasNextPage = filters.PageNumber < totalPages;
+        var hasPreviousPage = filters.PageNumber > 1;
+
+        var response = new PaginatedResponse<StadiumResponse>(
+            stadiumResponses,
+            totalCount,
+            filters.PageNumber,
+            totalPages,
+            hasNextPage,
+            hasPreviousPage);
+
         return Result.Success(response);
     }
 

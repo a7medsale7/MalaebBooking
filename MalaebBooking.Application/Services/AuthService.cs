@@ -96,13 +96,9 @@ public class AuthService(UserManager<ApplicationUser> userManager,
             ExpiresIn = (int)(expiration - DateTime.UtcNow).TotalSeconds,
             RefreshToken = refreshToken,
             RefreshTokenExpiration = refreshTokenExpiry
-        };
-
-      
+        };      
         return Result.Success(response);
     }
-
-
     public async Task<Result> RegisterAsync(
     RegisterRequest registerRequest,
     CancellationToken cancellationToken)

@@ -18,9 +18,9 @@ public class StadiumsController(IStadiumService stadiumService) : ControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] StadiumFilters filters)
     {
-        var result = await _stadiumService.GetAllStadiumsAsync();
+        var result = await _stadiumService.GetAllStadiumsAsync(filters);
         return result.IsFailure ? NotFound(result.Error) : Ok(result.Value);
     }
 

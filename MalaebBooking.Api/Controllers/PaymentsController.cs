@@ -1,4 +1,4 @@
-﻿// 2. PaymentsController.cs
+using MalaebBooking.Application.Contracts;
 using MalaebBooking.Application.Contracts.Payments;
 using MalaebBooking.Application.Services;
 using MalaebBooking.Domain.Consts;
@@ -14,6 +14,14 @@ namespace MalaebBooking.Api.Controllers;
 public class PaymentsController(IPaymentService paymentService) : ControllerBase
 {
     private readonly IPaymentService _paymentService = paymentService;
+
+    [HttpGet]
+    [Authorize(Roles = DefaultRoles.Admin, Policy = Permissions.Payments_View)]
+    public async Task<IActionResult> GetAll([FromQuery] RequestFilters filters)
+    {
+        var result = await _paymentService.GetAllPaymentsAsync(filters);
+        return result.IsFailure ? BadRequest(result.Error) : Ok(result.Value);
+    }
 
     [HttpGet("booking/{bookingId}")]
     [Authorize(Policy = Permissions.Payments_View)]

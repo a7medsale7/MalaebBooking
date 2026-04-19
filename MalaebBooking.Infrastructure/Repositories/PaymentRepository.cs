@@ -70,4 +70,43 @@ public class PaymentRepository : IPaymentRepository
             .ToListAsync();
     }
 
+    public async Task<(List<Payment> Items, int TotalCount)> GetPagedAsync(
+        int pageNumber,
+        int pageSize,
+        string? searchValue,
+        string? sortColumn,
+        string? sortDirection,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Payments
+            .Include(p => p.Booking)
+                .ThenInclude(b => b.Player)
+            .Include(p => p.Booking)
+                .ThenInclude(b => b.TimeSlot)
+                    .ThenInclude(t => t.Stadium)
+            .AsNoTracking()
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(searchValue))
+        {
+            query = query.Where(p => p.Booking.Player.FirstName.Contains(searchValue) || 
+                                     p.Booking.Player.LastName.Contains(searchValue) ||
+                                     p.Booking.TimeSlot.Stadium.Name.Contains(searchValue));
+        }
+
+        query = sortColumn?.ToLower() switch
+        {
+            "date" => sortDirection == "desc" ? query.OrderByDescending(p => p.CreatedOn) : query.OrderBy(p => p.CreatedOn),
+            "status" => sortDirection == "desc" ? query.OrderByDescending(p => p.Status) : query.OrderBy(p => p.Status),
+            _ => query.OrderByDescending(p => p.Id)
+        };
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
 }
